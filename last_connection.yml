@@ -1,0 +1,11 @@
+baudrate: '115200'
+file: D:/Projekty/Programowanide/CanSat/stacja/log2.txt
+port: COM9
+port_num: 2
+positionX: '50.05925'
+positionY: '19.92293'
+timeout: '1'
+use_event_manager: !!python/object/apply:sip._unpickle_enum
+- PyQt5.QtCore
+- CheckState
+- 2
