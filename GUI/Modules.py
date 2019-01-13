@@ -5,6 +5,8 @@ from PyQt5.QtWidgets import (QWidget, QPushButton, QLineEdit, QFrame,
 QDialog, QApplication, QComboBox, QLabel, QCheckBox, QGridLayout, QFileDialog)
 import matplotlib.pyplot as plt
 
+#Work in progress
+
 class DictReader:
     def __init__(self, dict, default):
         self.dict = dict
@@ -37,6 +39,9 @@ class InfoTable:
         for i in self.tables:
             if i['id']==id:
                 i['value'].setText(value)
+
+    def __call__(self):
+        return self.grid
 
 class GUIWindow(QWidget):
     def __init__(self, **kwargs):
@@ -72,16 +77,16 @@ class GUIWindow(QWidget):
         except:
             pass
 
-
+#Testing
 class TheWindow(GUIWindow):
     def initUI(self):
-        it=InfoTable()
-        it.add('speed', 'Prędkość')
+        print('init')
+        #it=InfoTable()
+        #it.add('speed', 'Prędkość')
         value_lable=QLabel('-')
-        self.layout.addLayout(it, 1,1)
-        self.layout.addWidget(value_lable, 1,0)
+        self.layout.addLayout(it(), 1, 1)
+        self.layout.addWidget(value_lable, 1, 0)
 
 app=QApplication(sys.argv)
 win=TheWindow()
-win.show()
 app.exec_()

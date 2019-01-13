@@ -8,37 +8,34 @@ import threading
 
 
 def main_window(app, conf):
-    em=Manager(conf['file'])
+    em=Manager(conf['file'])#new EventManager
     r=Radio(port=conf['port'], baudrate = conf['baudrate'],
-    timeout=conf['timeout'], event_manager=em)
-    win=MainWidgetWindow(conf,[{'id':'positionX' , 'text': 'Pozycja X:' , 'value': None},
-    {'id': 'positionY', 'text': 'Pozycja Y:' , 'value': None},
-    {'id':'altitude' , 'text':'Wysokość:' , 'value': None},
-    {'id': 'temperature', 'text':'Temperatura:' , 'value': None},
-    {'id': 'pressure', 'text':'Ciśnienie:' , 'value': None},
-    {'id': 'rssi', 'text':'RSSI:' , 'value': None}])
-    reader = threading.Thread(target=r.keepReading, args=(True, ), kwargs={'call':win.update})
+    timeout=conf['timeout'], event_manager=em)#new Radio
+    labels=[{'id':'positionX' , 'text': 'Pozycja X:'},
+    {'id': 'positionY', 'text': 'Pozycja Y:'},
+    {'id':'altitude' , 'text':'Wysokość:'},
+    {'id': 'temperature', 'text':'Temperatura:'},
+    {'id': 'pressure', 'text':'Ciśnienie:'},
+    {'id': 'rssi', 'text':'RSSI:'}]#labels to display
+    win=MainWidgetWindow(conf, labels)
+    reader = threading.Thread(target=r.keepReading, args=(True, ), kwargs={'call':win.update})#radio reader Thread
     reader.start()
     app.exec_()
 
-def call_update(data):
-    print(data)
 
 def new_connection(app):
-    serials=SerialLoader().all_serials()
-    names=[]
+    serials=SerialLoader().all_serials() #find all serial ports
+    names=[] #names of serials (COM9)
     for s in serials:
         names.append(s.device)
     win=ConfigureConnectionWindow(names)
     app.exec_()
-    if(win.response):
+    if(win.response):#on connent
         main_window(app, win.response)
-'''
-r=Radio(port='COM11')
-r.keepReading(condition=True, call=print)
-'''
-app = QApplication(sys.argv)
-win = OpenWindow()
-app.exec_()
-if(win.response=='NC'):
-    new_connection(app)
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    win = OpenWindow()
+    app.exec_()
+    if(win.response=='NC'): #new connection
+        new_connection(app)
