@@ -5,8 +5,6 @@ from PyQt5.QtWidgets import (QWidget, QPushButton, QLineEdit, QFrame,
 QDialog, QApplication, QComboBox, QLabel, QCheckBox, QGridLayout, QFileDialog)
 import matplotlib.pyplot as plt
 
-#To be changed with Modules API
-
 class OpenWindow(QWidget):
     def __init__(self):
         super().__init__()
@@ -166,9 +164,10 @@ class MainWidgetWindow(QWidget):
             'value':QLabel('-')}
             self.info_grid.addWidget(self.labels[labels[i]['id']]['text'], k+1, j)
             self.info_grid.addWidget(self.labels[labels[i]['id']]['value'], k+1, j+1)
+
         frame=QFrame()
         frame.setFrameShape(QFrame.VLine)
-        #self.info_grid.addWidget(frame, 1, 3, elements, 1)
+        self.info_grid.addWidget(frame, 1, 3, elements, 1)
 
         self.main_grid.addLayout(self.info_grid, 1,0)
 
@@ -196,10 +195,9 @@ class MainWidgetWindow(QWidget):
         posY=None
         rssi=None
         print(data)
-        text={}
 
         for d in data:
-            text[d['id']]=d['value']
+
             for l_item, l_value in self.labels.items():
                 if l_item == d['id']:
                     l_value['value'].setText(d['value'])
@@ -211,9 +209,8 @@ class MainWidgetWindow(QWidget):
                 posY=d['value']
             if d['id']=='rssi':
                 rssi=d['value']
-
         if posX!=None and posY!=None:
-            self.map_add_point(posX, posY, rssi, str(text))
+            self.map_add_point(posX, posY, rssi, '')
 
 
     def map_functions(self):

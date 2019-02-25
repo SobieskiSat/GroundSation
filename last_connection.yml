@@ -1,9 +1,9 @@
 baudrate: '115200'
-file: D:/Projekty/Programowanide/CanSat/stacja/log2.txt
-port: COM9
-port_num: 2
-positionX: '50.05925'
-positionY: '19.92293'
+file: D:/Projekty/Programowanide/CanSat/stacja/log4.txt
+port: COM4
+port_num: 0
+positionX: '50.384346'
+positionY: ' 19.757578'
 timeout: '1'
 use_event_manager: !!python/object/apply:sip._unpickle_enum
 - PyQt5.QtCore
