@@ -20,14 +20,14 @@ def main_window(app, conf):
     }
 
     structure = [
-    {'id': 'rssi', 'text':'RSSI:' , 'num': None},
-    {'id':'positionX' , 'text': 'Pozycja X:' , 'num': None},
-    {'id': 'positionY', 'text': 'Pozycja Y:' , 'num': None},
-    {'id':'altitude' , 'text':'Wysokość:' , 'num': None},
-    {'id': 'temperature', 'text':'Temperatura:' , 'num': None},
-    {'id': 'pressure', 'text':'Ciśnienie:' , 'num': None},
-    {'id': 'pm25', 'text':'PM-2,5:' , 'num': None},
-    {'id': 'pm10', 'text':'PM-10:' , 'num': None}
+    {'id': 'rssi', 'text':'RSSI:' , 'num': 0},
+    {'id':'positionX' , 'text': 'Pozycja X:' , 'num': 1},
+    {'id': 'positionY', 'text': 'Pozycja Y:' , 'num': 2},
+    {'id':'altitude' , 'text':'Wysokość:' , 'num': 3},
+    {'id': 'temperature', 'text':'Temperatura:' , 'num': 4},
+    {'id': 'pressure', 'text':'Ciśnienie:' , 'num': 5},
+    {'id': 'pm25', 'text':'PM-2,5:' , 'num': 6},
+    {'id': 'pm10', 'text':'PM-10:' , 'num': 7}
     ]
 
     dr=DataReader(structure, radio, event_manager = em)
@@ -40,8 +40,8 @@ def main_window(app, conf):
     {'id': 'pm25', 'text':'PM-2,5:' , 'value': None},
     {'id': 'pm10', 'text':'PM-10:' , 'value': None}
     ])
-    
-    reader = threading.Thread(target=dr.keepReading, args=(True, ), kwargs={'call':print})
+
+    reader = threading.Thread(target=dr.keepReading, args=(True, ), kwargs={'call':win.update})
     reader.start()
     app.exec_()
 

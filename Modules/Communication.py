@@ -8,11 +8,11 @@ class DataReader:
         self.structure = structure #structure of data received from satellite
         for s in self.structure: #check if every stucture has all attributes
             for p in ['id', 'text', 'num']:
-                if not p in s:
+                if not(p in s):
                     raise Exception('Not found "'+p+'" in "'+str(s)+'" structures')
 
         for p in ['baudrate', 'port', 'timeout']:#check if radio has all attributes
-            if not p in radio:
+            if not( p in radio):
                 raise Exception('Not found "'+p+'" in "'+str(radio)+'" radio')
         try: #open _log_manager
             self._log_manager('open_DataReader:open_log_manager', structure=structure, radio=radio, kwargs=kwargs)
@@ -32,13 +32,13 @@ class DataReader:
 
     def keepReading(self, condition, interval=1, **kwargs):
         lastLine='RUN'
-        if not 'second_condition' in kwargs:
+        if not ('second_condition' in kwargs):
             second_condition=True
         while(condition):
             if(second_condition):
                 line=self.radio.readline()
                 if lastLine!=line and ('call' in kwargs) and line!=None:
-                    line = self.parser(line)
+                    line = self.parser(line, self.structure)
                     kwargs['call'](line)
                 lastLine=line
         time.sleep(interval)
@@ -50,7 +50,8 @@ class DataReader:
             data = data.split("_")
             for s in st:
                 s['value']=data[s['num']]#set value of every structure
-        return s
+        #print(st)
+        return st
 
         #checksum --- to be added
 
@@ -91,8 +92,8 @@ class Radio:
         self.lines=[]
         self.lines.append('Opening:')
         while(condition):
-            line=self.readline()
-            #line=0
+            #line=self.readline()
+            line=b'80_50.4482155_21.7964096_0.0_28.02_1003.46_8.3_9.2\r\n'
             time.sleep(interval)
             if self.lines[-1]!=line and 'call' in kwargs and line!=None:
                 line = self.parser(line)
@@ -134,7 +135,7 @@ class Radio:
         except Exception:
             pass
         #print(type(data))
-        print(data1)
+        #print(data1)
         return res
 
 

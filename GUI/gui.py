@@ -4,6 +4,8 @@ from PyQt5 import QtWebEngineWidgets, QtCore
 from PyQt5.QtWidgets import (QWidget, QPushButton, QLineEdit, QFrame,
 QDialog, QApplication, QComboBox, QLabel, QCheckBox, QGridLayout, QFileDialog)
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 class OpenWindow(QWidget):
     def __init__(self):
@@ -134,6 +136,7 @@ class MainWidgetWindow(QWidget):
     def initUI(self, conf, labels):
         self.labels={}
         self.conf=conf
+        self.data=[]
 
         '''
         self.locationX_label=QLabel('Pozycja X:')
@@ -176,6 +179,8 @@ class MainWidgetWindow(QWidget):
         #self.webView.page.run
         #page().runJavaScript("[map.getBounds().getSouthWest().lat, map.getBounds().getSouthWest().lng, map.getBounds().getNorthEast().lat, map.getBounds().getNorthEast().lng]")
         self.main_grid.addWidget(self.webView, 1,1)
+        self.draw_plot('1')
+        self.main_grid.addWidget(self.plot.canvas, 2,0)
         self.webView.loadFinished.connect(self.webView_loaded_event)
         self.setLayout(self.main_grid)
         #self.map_functions()
@@ -202,7 +207,7 @@ class MainWidgetWindow(QWidget):
                 if l_item == d['id']:
                     l_value['value'].setText(d['value'])
 
-            print(d)
+            #print(d)
             if d['id']=='positionX':
                 posX=d['value']
             if d['id']=='positionY':
@@ -210,7 +215,12 @@ class MainWidgetWindow(QWidget):
             if d['id']=='rssi':
                 rssi=d['value']
         if posX!=None and posY!=None:
-            self.map_add_point(posX, posY, rssi, '')
+            self.map_add_point(posX, posY, rssi, str(data))
+        self.data.append(data)
+        try:
+            self.plot.update()
+        except Exception:
+            print('Graf nie działa!!!')
 
 
     def map_functions(self):
@@ -233,6 +243,39 @@ class MainWidgetWindow(QWidget):
         w=self.webView.frameSize().width()
         h=self.webView.frameSize().height()
         self.webView.page().runJavaScript('resizeMap("'+str(w)+'px","'+str(h)+'px")')
+
+    def draw_plot(self, type):
+        if type=='1':
+            self.plot=PlotG(['height'], ['pressure'], self.data)
+        self.plot.canvas.draw()
+
+
+
+class PlotG:
+    def __init__(self, lx, ly, data):
+
+        self.lx=lx#list of x param
+        self.ly=ly# y param
+        self.plot=[]#all subplots
+        self.fig = plt.Figure()#main figure
+        self.canvas=FigureCanvas(self.fig)
+        for x in lx:
+            self.plot.append(self.fig.add_subplot(1,1,1))#add subfigures
+
+    def update(self):#updates plot on call
+        for i in range(0, len(self.plot)):
+            tpl=self.plot[i]
+            tpl.clear()
+            tpl.plot(make_data(self.lx[i]), make_data(self.ly[i]))
+
+    def make_data(self, id):#converts whole data into list of nums of id
+        data=[]
+        for d in self.data:
+            try:
+                data.append(float(d['id']))
+            except Exception:
+                pass
+        return data
 '''
 stream = open('last_connection.yml', 'r')
 print(yaml.load(stream))
