@@ -9,6 +9,8 @@ import threading
 
 def main_window(app, conf):
     em=Manager(conf['file'])
+    rds = DataSaver('dstest.txt')#raw data sever
+
     '''
     r=Radio(port=conf['port'], baudrate = conf['baudrate'],
     timeout=conf['timeout'], event_manager=em)
@@ -24,13 +26,14 @@ def main_window(app, conf):
     {'id':'positionX' , 'text': 'Pozycja X:' , 'num': 1},
     {'id': 'positionY', 'text': 'Pozycja Y:' , 'num': 2},
     {'id':'altitude' , 'text':'Wysokość:' , 'num': 3},
-    {'id': 'temperature', 'text':'Temperatura:' , 'num': 4},
-    {'id': 'pressure', 'text':'Ciśnienie:' , 'num': 5},
+    {'id': 'temperature', 'text':'Temperatura:' , 'num': 5},
+    {'id': 'pressure', 'text':'Ciśnienie:' , 'num': 4},
     {'id': 'pm25', 'text':'PM-2,5:' , 'num': 6},
     {'id': 'pm10', 'text':'PM-10:' , 'num': 7}
+
     ]
 
-    dr=DataReader(structure, radio, event_manager = em)
+    dr=DataReader(structure, radio, event_manager = em, rds=rds)
     win=MainWidgetWindow(conf,[{'id': 'rssi', 'text':'RSSI:' , 'value': None},
     {'id':'positionX' , 'text': 'Pozycja X:' , 'value': None},
     {'id': 'positionY', 'text': 'Pozycja Y:' , 'value': None},
@@ -41,14 +44,15 @@ def main_window(app, conf):
     {'id': 'pm10', 'text':'PM-10:' , 'value': None}
     ])
 
-    reader = threading.Thread(target=dr.keepReading, args=(True, ), kwargs={'call':win.update})
+    reader = threading.Thread(target=dr.keepReading, args=(True, ), kwargs={'call':win.update,})
     reader.start()
     app.exec_()
 
 def call_update(data):
     print(data)
 
-def new_connection(app):
+def new_connection(app
+):
     serials=SerialLoader().all_serials()
     names=[]
     for s in serials:

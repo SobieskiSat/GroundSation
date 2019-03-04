@@ -2,10 +2,13 @@ import sys
 import yaml
 from PyQt5 import QtWebEngineWidgets, QtCore
 from PyQt5.QtWidgets import (QWidget, QPushButton, QLineEdit, QFrame,
-QDialog, QApplication, QComboBox, QLabel, QCheckBox, QGridLayout, QFileDialog)
+QDialog, QApplication, QComboBox, QLabel, QCheckBox, QGridLayout, QFileDialog,
+QHBoxLayout, QVBoxLayout, QSplitter)
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+
+from random import randint#nie potrzebne
 
 class OpenWindow(QWidget):
     def __init__(self):
@@ -133,10 +136,11 @@ class MainWidgetWindow(QWidget):
     def __init__(self, conf, labels):
         super().__init__()
         self.initUI(conf, labels)
+        self.data=[]
     def initUI(self, conf, labels):
         self.labels={}
         self.conf=conf
-        self.data=[]
+
 
         '''
         self.locationX_label=QLabel('Pozycja X:')
@@ -148,8 +152,25 @@ class MainWidgetWindow(QWidget):
         self.RRSI_label=QLabel('RRSI:')
         self.frequency_label=QLabel('Częstotliwość:')
         '''
-        self.main_grid = QGridLayout()
+        self.main_grid = QVBoxLayout()
+        self.top_widget=QWidget()
+        self.top_grid=QGridLayout()
+        self.top_widget.setLayout(self.top_grid)
+        self.bottom_widget=QWidget()
+        self.bottom_grid=QGridLayout()
+        self.bottom_widget.setLayout(self.bottom_grid)
         self.info_grid = QGridLayout()
+        self.info_widget=QWidget()
+        self.info_widget.setLayout(self.info_grid)
+
+        self.top_splitter=QSplitter(QtCore.Qt.Horizontal)
+        self.top_splitter.addWidget(self.info_widget)
+
+
+        self.vertical_splitter=QSplitter(QtCore.Qt.Vertical)
+        self.vertical_splitter.addWidget(self.top_splitter)
+        self.vertical_splitter.addWidget(self.bottom_widget)
+
         self.info_grid.setSpacing(10)
         elements=len(labels)
         if elements%2==0:
@@ -172,16 +193,19 @@ class MainWidgetWindow(QWidget):
         frame.setFrameShape(QFrame.VLine)
         self.info_grid.addWidget(frame, 1, 3, elements, 1)
 
-        self.main_grid.addLayout(self.info_grid, 1,0)
-
         self.webView = QtWebEngineWidgets.QWebEngineView()
         self.webView.setUrl(QtCore.QUrl("D:\Projekty\Programowanide\CanSat\stacja\maps\map.html"))
         #self.webView.page.run
         #page().runJavaScript("[map.getBounds().getSouthWest().lat, map.getBounds().getSouthWest().lng, map.getBounds().getNorthEast().lat, map.getBounds().getNorthEast().lng]")
-        self.main_grid.addWidget(self.webView, 1,1)
-        self.draw_plot('1')
-        self.main_grid.addWidget(self.plot.canvas, 2,0)
+        self.top_grid.addWidget(self.webView, 1,1)
+        self.plot=self.draw_plot('altitude', 'pressure')
+        self.plot2=self.draw_plot('pressure', 'rssi')
+        self.bottom_grid.addWidget(self.plot.canvas, 1,0)
+        self.bottom_grid.addWidget(self.plot2.canvas, 1,1)
         self.webView.loadFinished.connect(self.webView_loaded_event)
+        self.top_splitter.addWidget(self.webView)
+
+        self.main_grid.addWidget(self.vertical_splitter)
         self.setLayout(self.main_grid)
         #self.map_functions()
         '''
@@ -189,6 +213,8 @@ class MainWidgetWindow(QWidget):
         self.plot.ylabel('some numbers')
         self.main_grid.addWidget(self.plot,2,1)
         '''
+        self.vertical_splitter.splitterMoved.connect(self.resize_map)
+        self.top_splitter.splitterMoved.connect(self.resize_map)
         self.input_grid=QGridLayout()
 
         self.setGeometry(300, 300, 590, 350)
@@ -199,7 +225,7 @@ class MainWidgetWindow(QWidget):
         posX=None
         posY=None
         rssi=None
-        print(data)
+        #print(data)
 
         for d in data:
 
@@ -217,10 +243,14 @@ class MainWidgetWindow(QWidget):
         if posX!=None and posY!=None:
             self.map_add_point(posX, posY, rssi, str(data))
         self.data.append(data)
+        print(data[-1])
+        print(self.data)
+        print(' try plot')
         try:
-            self.plot.update()
-        except Exception:
-            print('Graf nie działa!!!')
+            self.plot.update(self.data)
+            self.plot2.update(self.data)
+        except Exception as e:
+            print('Graf nie działa!!!'+str(e))
 
 
     def map_functions(self):
@@ -244,38 +274,59 @@ class MainWidgetWindow(QWidget):
         h=self.webView.frameSize().height()
         self.webView.page().runJavaScript('resizeMap("'+str(w)+'px","'+str(h)+'px")')
 
-    def draw_plot(self, type):
-        if type=='1':
-            self.plot=PlotG(['height'], ['pressure'], self.data)
-        self.plot.canvas.draw()
+    def draw_plot(self, typex, typey):
+        return PlotG(typex, typey)
+
+    def __del__(self):
+        with open('log1a.yml', 'w') as outfile:
+            yaml.dump(self.data, outfile, default_flow_style=False)
 
 
 
 class PlotG:
-    def __init__(self, lx, ly, data):
+    def __init__(self, lx, ly):
+        self.fig = plt.Figure()#main figure
+        self.canvas=FigureCanvas(self.fig)
+        self.sp=self.fig.add_subplot(1,1,1)
 
         self.lx=lx#list of x param
         self.ly=ly# y param
-        self.plot=[]#all subplots
-        self.fig = plt.Figure()#main figure
-        self.canvas=FigureCanvas(self.fig)
-        for x in lx:
-            self.plot.append(self.fig.add_subplot(1,1,1))#add subfigures
+        #self.plot=[]#all subplots
+    '''
+    def update(self):
+        print(self.sp)
+        self.datax.append(randint(1,20))
+        self.datay.append(self.datay[-1]+1)
+        self.sp.clear()
+        self.sp.plot( self.datay[-30:],self.datax[-30:])
+        self.canvas.draw()
+    '''
 
-    def update(self):#updates plot on call
-        for i in range(0, len(self.plot)):
-            tpl=self.plot[i]
-            tpl.clear()
-            tpl.plot(make_data(self.lx[i]), make_data(self.ly[i]))
 
-    def make_data(self, id):#converts whole data into list of nums of id
-        data=[]
-        for d in self.data:
-            try:
-                data.append(float(d['id']))
-            except Exception:
-                pass
-        return data
+
+    def update(self, data):#updates plot on call
+        self.sp.clear()
+        self.sp.plot(range(0, len(self.make_data(self.ly, data))), self.make_data(self.ly, data))
+        #self.sp.plot(self.make_data(self.ly, data), self.make_data(self.lx, data))
+        self.canvas.draw()
+
+        #print('xdddd')
+
+    def make_data(self, id, data):#converts whole data into list of nums of id
+        res=[]
+        #print(data)
+        try:
+            for d in data:
+                for dd in d:
+                    if(dd['id']==id):
+                        #print(dd)
+                        res.append(dd['value'])
+
+            #print(res)
+        except Exception as e:
+            print(e)
+        return res
+
 '''
 stream = open('last_connection.yml', 'r')
 print(yaml.load(stream))

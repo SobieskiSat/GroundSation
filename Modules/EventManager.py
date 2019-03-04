@@ -6,7 +6,7 @@ class Manager:
             self.file = open(file, 'a')
             self.verbose = verbose
         except Exception as e:
-            print('Otwarcie Pliku '+str(file)+' nie powiodło się: '+str(e))
+            print('EM: Otwarcie Pliku '+str(file)+' nie powiodło się: '+str(e))
 
     def write_event(self, object, action,  **kwargs):
         localtime = time.asctime( time.localtime(time.time()))
@@ -20,6 +20,23 @@ class Manager:
 
     def __call__(self, object, action, **kwargs):
         self.write_event(object, action, kwargs = kwargs)
+
+    def __del__(self):
+        self.file.close()
+
+class DataSaver:
+    def __init__(self, file):
+        try:
+            self.file = file
+            self.file = open(self.file, 'a')
+        except Exception as e:
+            print('DataSever: Otwarcie Pliku '+str(file)+' nie powiodło się: '+str(e))
+
+    def write(self, data):
+        self.file.write(str(time.time())+'_'+str(data)+'\n')
+
+    def __call__(self, data):
+        self.write(data)
 
     def __del__(self):
         self.file.close()

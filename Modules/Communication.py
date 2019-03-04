@@ -1,6 +1,7 @@
 import serial
 import serial.tools.list_ports
 import time
+import yaml
 
 class DataReader:
     def __init__(self, structure, radio, **kwargs):
@@ -30,6 +31,10 @@ class DataReader:
         if('event_manager' in self.kwargs):
             self.kwargs['event_manager'](self, action, kwargs=kwargs)
 
+    def _raw_data_sever(self, data):
+        if('rds' in self.kwargs):
+            self.kwargs['rds'](data)
+
     def keepReading(self, condition, interval=1, **kwargs):
         lastLine='RUN'
         if not ('second_condition' in kwargs):
@@ -37,11 +42,13 @@ class DataReader:
         while(condition):
             if(second_condition):
                 line=self.radio.readline()
+                #line=b'80_50.4482155_21.7964096_0.0_28.02_1003.46_8.3_9.2\r\n'
                 if lastLine!=line and ('call' in kwargs) and line!=None:
+                    self._raw_data_sever(line)
                     line = self.parser(line, self.structure)
                     kwargs['call'](line)
                 lastLine=line
-        time.sleep(interval)
+        time.sleep(1)
 
     def parser(self, data, structure):
         st = self.structure
@@ -54,7 +61,11 @@ class DataReader:
         return st
 
         #checksum --- to be added
-
+    '''
+    def __del__(self):
+        with open('log.yml', 'w') as outfile:
+            yaml.dump(self., outfile, default_flow_style=False)
+    '''
 
 
 
@@ -76,7 +87,6 @@ class Radio:
             timeout=timeout, exception=e)
 
     def readline(self):
-        self._log_manager('readline:call')
         try:
             data_r=self.ser.readline()
             self._log_manager('readline:received', data=data_r)
@@ -93,7 +103,7 @@ class Radio:
         self.lines.append('Opening:')
         while(condition):
             #line=self.readline()
-            line=b'80_50.4482155_21.7964096_0.0_28.02_1003.46_8.3_9.2\r\n'
+            #line=b'80_50.4482155_21.7964096_0.0_28.02_1003.46_8.3_9.2\r\n'
             time.sleep(interval)
             if self.lines[-1]!=line and 'call' in kwargs and line!=None:
                 line = self.parser(line)
