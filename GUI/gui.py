@@ -1,9 +1,10 @@
 import sys
 import yaml
+import copy
 from PyQt5 import QtWebEngineWidgets, QtCore
 from PyQt5.QtWidgets import (QWidget, QPushButton, QLineEdit, QFrame,
 QDialog, QApplication, QComboBox, QLabel, QCheckBox, QGridLayout, QFileDialog,
-QHBoxLayout, QVBoxLayout, QSplitter)
+QHBoxLayout, QVBoxLayout, QSplitter, QRadioButton, QButtonGroup)
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -36,6 +37,7 @@ class ConfigureConnectionWindow(QWidget):
 
         self.file=''
 
+        self.logButttonGroup=QButtonGroup(self)
         self.port_label=QLabel('Port:')
         self.baudrate_label=QLabel('Baudrate:')
         self.timeout_label=QLabel('Timeout:')
@@ -135,8 +137,8 @@ class ConfigureConnectionWindow(QWidget):
 class MainWidgetWindow(QWidget):
     def __init__(self, conf, labels):
         super().__init__()
+        self.dm=DataManager(1000)
         self.initUI(conf, labels)
-        self.data=[]
     def initUI(self, conf, labels):
         self.labels={}
         self.conf=conf
@@ -198,10 +200,10 @@ class MainWidgetWindow(QWidget):
         #self.webView.page.run
         #page().runJavaScript("[map.getBounds().getSouthWest().lat, map.getBounds().getSouthWest().lng, map.getBounds().getNorthEast().lat, map.getBounds().getNorthEast().lng]")
         self.top_grid.addWidget(self.webView, 1,1)
-        self.plot=self.draw_plot('altitude', 'pressure')
-        self.plot2=self.draw_plot('pressure', 'rssi')
-        self.bottom_grid.addWidget(self.plot.canvas, 1,0)
-        self.bottom_grid.addWidget(self.plot2.canvas, 1,1)
+        self.plot=self.draw_plot('altitude', 'pressure', self.dm)
+        self.plot2=self.draw_plot('pressure', 'rssi', self.dm)
+        self.bottom_grid.addWidget(self.plot.get_widget(), 1,0)
+        self.bottom_grid.addWidget(self.plot2.get_widget(), 1,1)
         self.webView.loadFinished.connect(self.webView_loaded_event)
         self.top_splitter.addWidget(self.webView)
 
@@ -221,12 +223,13 @@ class MainWidgetWindow(QWidget):
         self.setWindowTitle('SobieskiSat')
         self.show()
 
-    def update(self, data):
+    def update(self, datag):
         posX=None
         posY=None
         rssi=None
+        data=copy.deepcopy(datag)
         #print(data)
-
+        self.dm.add(data)
         for d in data:
 
             for l_item, l_value in self.labels.items():
@@ -242,13 +245,10 @@ class MainWidgetWindow(QWidget):
                 rssi=d['value']
         if posX!=None and posY!=None:
             self.map_add_point(posX, posY, rssi, str(data))
-        self.data.append(data)
-        print(data[-1])
-        print(self.data)
-        print(' try plot')
+        #print(' try plot')
         try:
-            self.plot.update(self.data)
-            self.plot2.update(self.data)
+            self.plot.update()
+            self.plot2.update()
         except Exception as e:
             print('Graf nie działa!!!'+str(e))
 
@@ -274,8 +274,8 @@ class MainWidgetWindow(QWidget):
         h=self.webView.frameSize().height()
         self.webView.page().runJavaScript('resizeMap("'+str(w)+'px","'+str(h)+'px")')
 
-    def draw_plot(self, typex, typey):
-        return PlotG(typex, typey)
+    def draw_plot(self, typex, typey, dm):
+        return PlotG(typex, typey, dm)
 
     def __del__(self):
         with open('log1a.yml', 'w') as outfile:
@@ -284,10 +284,12 @@ class MainWidgetWindow(QWidget):
 
 
 class PlotG:
-    def __init__(self, lx, ly):
+    def __init__(self, lx, ly, dm):
+        self.dm=dm
         self.fig = plt.Figure()#main figure
         self.canvas=FigureCanvas(self.fig)
         self.sp=self.fig.add_subplot(1,1,1)
+        self.length=100
 
         self.lx=lx#list of x param
         self.ly=ly# y param
@@ -304,28 +306,76 @@ class PlotG:
 
 
 
-    def update(self, data):#updates plot on call
+    def update(self):#updates plot on call
         self.sp.clear()
-        self.sp.plot(range(0, len(self.make_data(self.ly, data))), self.make_data(self.ly, data))
+        tab=self.dm.get_by_id(self.ly, self.length)
+        self.sp.plot(range(0, len(tab)), tab)
         #self.sp.plot(self.make_data(self.ly, data), self.make_data(self.lx, data))
         self.canvas.draw()
 
         #print('xdddd')
 
     def make_data(self, id, data):#converts whole data into list of nums of id
-        res=[]
-        #print(data)
-        try:
-            for d in data:
-                for dd in d:
-                    if(dd['id']==id):
-                        #print(dd)
-                        res.append(dd['value'])
+        pass
 
-            #print(res)
+    def get_widget(self):
+        self.widget=QWidget()
+        self.widget_layout=QGridLayout()
+        self.widget.setLayout(self.widget_layout)
+        self.button_layout=QGridLayout()
+        self.widget_layout.addWidget(self.canvas, 1, 0)
+        self.widget_layout.addLayout(self.button_layout, 1, 1)
+        self.zoomin_button=QPushButton('+', self.widget)
+        self.zoomout_button=QPushButton('-',self.widget)
+        self.zoomin_button.setMaximumSize(30, 30)
+        self.zoomout_button.setMaximumSize(30, 30)
+        self.zoomin_button.clicked.connect(self._zoomin)
+        self.zoomout_button.clicked.connect(self._zoomout)
+        self.button_layout.addWidget(self.zoomin_button, 1, 0)
+        self.button_layout.addWidget(self.zoomout_button, 2, 0)
+        return self.widget
+
+    def _zoomin(self):
+        if self.length>100:
+            self.length-=50
+
+    def _zoomout(self):
+        self.length+=50
+
+
+
+class DataManager:
+    def __init__(self, max):
+        self.max=max
+        self.data=[]
+
+    def add(self, line):
+        if len(self.data)>=self.max:
+            self.data.pop(0)
+        #print(line)
+        self.data.append(line)
+        #print(self.data)
+
+    def get_by_id(self, id, length):
+        list=self.get_last(length)
+        res=[]
+        try:
+            for l in list:
+                for dic in l:
+                    if(dic['id']==id):
+
+                        res.append(float(dic['value']))
         except Exception as e:
             print(e)
         return res
+
+    def get_last(self, length):
+        #print('xas')
+        try:
+            #print(self.data[-len])
+            return self.data[-length:]
+        except Exception:
+            pass
 
 '''
 stream = open('last_connection.yml', 'r')
