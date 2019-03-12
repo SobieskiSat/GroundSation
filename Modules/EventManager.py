@@ -1,10 +1,11 @@
 import time
+import os
 
 class Manager:
     def __init__(self, file, verbose=False):
+        self.verbose = verbose
         try:
             self.file = open(file, 'a')
-            self.verbose = verbose
         except Exception as e:
             print('EM: Otwarcie Pliku '+str(file)+' nie powiodło się: '+str(e))
 
@@ -14,7 +15,10 @@ class Manager:
             com = str(localtime)+' '+str(object.__class__.__name__)+' '+str(action)+' '+'\n'
         else:
             com=str(localtime)+' '+str(object.__class__.__name__)+' '+str(action)+' '+str(kwargs)+'\n'
-        self.file.write(com)
+        try:
+            self.file.write(com)
+        except Exception:
+            pass
         if(self.verbose==True):
             print(com)
 
@@ -22,7 +26,10 @@ class Manager:
         self.write_event(object, action, kwargs = kwargs)
 
     def __del__(self):
-        self.file.close()
+        try:
+            self.file.close()
+        except Exception:
+            pass
 
 class DataSaver:
     def __init__(self, file):
@@ -40,3 +47,28 @@ class DataSaver:
 
     def __del__(self):
         self.file.close()
+
+class DataManager:
+    def __init__(self, path):
+        self.path=''
+        if path!=None:
+            self.path=path
+        self.prefix='/saves'
+        self.path+=self.prefix
+        self.new_save()
+
+    def new_save(self):
+        num=0
+        while(os.path.isdir(self.path+'/'+str(num))):
+            num+=1
+        path=self.path+'/'+str(num)
+        try:
+            os.makedirs(path)
+        except Exception as e:
+            print(e)
+        self.ds=DataSaver(path+'/raw.txt')
+        self.em=Manager(path+'/em.txt', False)
+
+    def finish(self):
+        self.ds.__del__()
+        self.em.__del__()

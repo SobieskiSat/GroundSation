@@ -23,7 +23,8 @@ class DataReader:
             self._log_manager('open_radio', radio=radio)
             self.radio = Radio(radio['baudrate'], radio['port'], radio['timeout'], event_manager = self._log_manager)
         except Exception:
-            self._log_manager('open_radio:exception', radio=radio)
+            #self._log_manager('open_radio:exception', radio=radio)
+            pass
 
         self._log_manager('open_DataReader:done')# log everything is OK
 
@@ -83,8 +84,9 @@ class Radio:
             self.ser = serial.Serial(port, baudrate)
             self._log_manager('open_serial', baudrate = baudrate, port=port, timeout=timeout)
         except Exception as e:
-            self._log_manager('open_serial:exception', baudrate = baudrate, port=port,
-            timeout=timeout, exception=e)
+            #self._log_manager('open_serial:exception', baudrate = baudrate, port=port,
+            #timeout=timeout, exception=e)
+            pass
 
     def readline(self):
         try:
@@ -92,7 +94,8 @@ class Radio:
             self._log_manager('readline:received', data=data_r)
             return data_r
         except Exception as e:
-            self._log_manager('readline:exception', exception=e)
+            pass
+            #self._log_manager('readline:exception', exception=e)
 
     def _log_manager(self, action, **kwargs):
         if('event_manager' in self.kwargs):

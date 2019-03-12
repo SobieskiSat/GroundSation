@@ -8,8 +8,13 @@ import threading
 
 
 def main_window(app, conf):
+    '''
     em=Manager(conf['file'])
-    rds = DataSaver('dstest.txt')#raw data sever
+    rds = DataSaver('dstest6.txt')#raw data sever
+    '''
+    dm=DataManager(None)
+    em=dm.em
+    rds=dm.ds
 
     '''
     r=Radio(port=conf['port'], baudrate = conf['baudrate'],
