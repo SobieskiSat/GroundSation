@@ -1,6 +1,7 @@
 from GUI.gui import *
 from Modules.Communication import *
 from Modules.EventManager import *
+from Modules.Prediction import Predictor
 import sys
 from PyQt5.QtWidgets import QApplication
 import threading
@@ -15,6 +16,7 @@ def main_window(app, conf):
     dm=DataManager(None)
     em=dm.em
     rds=dm.ds
+    predictor = Predictor()
 
     '''
     r=Radio(port=conf['port'], baudrate = conf['baudrate'],
@@ -39,6 +41,9 @@ def main_window(app, conf):
     ]
 
     dr=DataReader(structure, radio, event_manager = em, rds=rds)
+    conf['dm']=dm
+    conf['labels']=structure
+    conf['predictor']=predictor
     win=MainWidgetWindow(conf,[{'id': 'rssi', 'text':'RSSI:' , 'value': None},
     {'id':'positionX' , 'text': 'Pozycja X:' , 'value': None},
     {'id': 'positionY', 'text': 'Pozycja Y:' , 'value': None},

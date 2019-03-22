@@ -60,7 +60,27 @@
 		var div = document.getElementById('mapid');
 		div.style.width=w;
 		div.style.height=h;
+		mymap.invalidateSize();
 	}
+	function centerMap(x, y) {
+			mymap.setView(new L.LatLng(x, y), 14);
+			mymap.invalidateSize();
+	}
+	var predictionCircle;
+
+	function drawPrediction(x, y, r) {
+		/*
+    if (predictionCircle != undefined) {
+      mymap.removeLayer(predictionCircle);
+    };*/
+    predictionCircle = L.circle([x, y], {
+      color: '#f07300',
+      fillOpacity: 0.3,
+      opacity: 0.5,
+			radius: r
+    }).addTo(mymap);
+  }
+
 	/*
 	const myCustomColour = '#583470';
   const markerHtmlStyles = `

@@ -41,7 +41,7 @@ class ConfigureConnectionWindow(QWidget):
         self.port_label=QLabel('Port:')
         self.baudrate_label=QLabel('Baudrate:')
         self.timeout_label=QLabel('Timeout:')
-        self.event_manager_box_label=QLabel('Use EventManager:')
+        self.event_manager_box_label=QLabel('Use custom EventManager:')
         self.event_manager_file_label=QLabel('Set Log File:')
         self.positionX_label=QLabel('Map focus X:')
         self.positionY_label=QLabel('Map focus Y:')
@@ -89,8 +89,6 @@ class ConfigureConnectionWindow(QWidget):
         self.form_grid.addWidget(self.positionY_edit, 7, 1)
         self.form_grid.addWidget(self.btn_connect, 8, 0)
         self.form_grid.addWidget(self.btn_load, 8, 1)
-
-
         self.setLayout(self.form_grid)
 
 
@@ -142,6 +140,7 @@ class MainWidgetWindow(QWidget):
     def initUI(self, conf, labels):
         self.labels={}
         self.conf=conf
+        labels=conf['labels']
 
 
         '''
@@ -154,6 +153,9 @@ class MainWidgetWindow(QWidget):
         self.RRSI_label=QLabel('RRSI:')
         self.frequency_label=QLabel('Częstotliwość:')
         '''
+
+        #menubar = self.menuBar()
+
         self.main_grid = QVBoxLayout()
         self.top_widget=QWidget()
         self.top_grid=QGridLayout()
@@ -163,7 +165,11 @@ class MainWidgetWindow(QWidget):
         self.bottom_widget.setLayout(self.bottom_grid)
         self.info_grid = QGridLayout()
         self.info_widget=QWidget()
-        self.info_widget.setLayout(self.info_grid)
+        self.panel_grid=QGridLayout()
+        self.option_grid=QGridLayout()
+        self.panel_grid.addLayout(self.info_grid, 1, 0)
+        self.panel_grid.addLayout(self.option_grid, 2, 0)
+        self.info_widget.setLayout(self.panel_grid)
 
         self.top_splitter=QSplitter(QtCore.Qt.Horizontal)
         self.top_splitter.addWidget(self.info_widget)
@@ -200,12 +206,43 @@ class MainWidgetWindow(QWidget):
         #self.webView.page.run
         #page().runJavaScript("[map.getBounds().getSouthWest().lat, map.getBounds().getSouthWest().lng, map.getBounds().getNorthEast().lat, map.getBounds().getNorthEast().lng]")
         self.top_grid.addWidget(self.webView, 1,1)
-        self.plot=self.draw_plot('altitude', 'pressure', self.dm)
-        self.plot2=self.draw_plot('pressure', 'rssi', self.dm)
-        self.bottom_grid.addWidget(self.plot.get_widget(), 1,0)
-        self.bottom_grid.addWidget(self.plot2.get_widget(), 1,1)
+        self.left_plot=self.draw_plot('altitude', 'pressure', self.dm)
+        self.right_plot=self.draw_plot('pressure', 'rssi', self.dm)
+        self.bottom_grid.addWidget(self.left_plot.get_widget(), 1,0)
+        self.bottom_grid.addWidget(self.right_plot.get_widget(), 1,1)
         self.webView.loadFinished.connect(self.webView_loaded_event)
         self.top_splitter.addWidget(self.webView)
+
+        self.new_flight_button=QPushButton('New Flight', self)
+        self.new_flight_button.clicked.connect(self.new_flight)
+        self.center_map_button=QPushButton('Center Map', self)
+        self.center_map_button.clicked.connect(self.center_map)
+        self.option_grid.addWidget(self.new_flight_button, 1, 0)
+        self.option_grid.addWidget(self.center_map_button, 1, 1)
+
+        self.left_plot_box = QComboBox(self)
+        self.left_plot_box.addItem('Pressure / Time')
+        self.left_plot_box.addItem('RSSI / Time')
+
+        self.left_plot_box.currentIndexChanged.connect(self.change_plots)
+
+        self.right_plot_box = QComboBox(self)
+        self.right_plot_box.addItem('pressure/time')
+        self.right_plot_box.addItem('RSSI/time')
+
+        self.left_plot_box.currentIndexChanged.connect(self.change_plots)
+
+
+        self.left_plot_box_label = QLabel('Left Plot')
+        self.right_plot_box_label = QLabel('Right Plot')
+
+        self.option_grid.addWidget(self.left_plot_box_label, 2, 0)
+        self.option_grid.addWidget(self.left_plot_box, 2, 1)
+        self.option_grid.addWidget(self.right_plot_box_label, 3, 0)
+        self.option_grid.addWidget(self.right_plot_box, 3, 1)
+
+        self.time_control = TimeControlWidget(self)
+        self.panel_grid.addWidget(self.time_control, 3, 0)
 
         self.main_grid.addWidget(self.vertical_splitter)
         self.setLayout(self.main_grid)
@@ -223,7 +260,28 @@ class MainWidgetWindow(QWidget):
         self.setWindowTitle('SobieskiSat')
         self.show()
 
+    def new_flight(self):
+        self.conf['dm'].new_save()
+
+    def change_plots(self):
+
+
+        left = self.left_plot_box.currentText
+        left.split('/')
+        ll=left[0]
+        lr=left[1]
+        rl=left[0]
+        rr=left[1]
+        self.plot.lx = left[0]
+    def center_map(self):
+        posX=str(self.dm.get_by_id('positionX', 1)[0])
+        posY=str(self.dm.get_by_id('positionY', 1)[0])
+        try:
+            self.webView.page().runJavaScript('centerMap('+posX+', '+posY+')')
+        except Exception as e:
+            print(e)
     def update(self, datag):
+        #print('xd')
         posX=None
         posY=None
         rssi=None
@@ -231,12 +289,10 @@ class MainWidgetWindow(QWidget):
         #print(data)
         self.dm.add(data)
         for d in data:
-
             for l_item, l_value in self.labels.items():
                 if l_item == d['id']:
                     l_value['value'].setText(d['value'])
 
-            #print(d)
             if d['id']=='positionX':
                 posX=d['value']
             if d['id']=='positionY':
@@ -247,11 +303,22 @@ class MainWidgetWindow(QWidget):
             self.map_add_point(posX, posY, rssi, str(data))
         #print(' try plot')
         try:
-            self.plot.update()
-            self.plot2.update()
+            self.left_plot.update()
+            self.right_plot.update()
         except Exception as e:
             print('Graf nie działa!!!'+str(e))
-
+        try:
+            if(len(self.dm.get_by_id('positionX', 50))==50):
+                pred=self.conf['predictor'].predict([
+                    self.dm.get_by_id('positionX', 50),
+                    self.dm.get_by_id('positionY', 50),
+                    self.dm.get_by_id('altitude', 50)], 202)
+                try:
+                    self.webView.page().runJavaScript('drawPrediction('+str(pred['x'])+', '+str(pred['y'])+', '+str(pred['r'])+')')
+                except Exception as e:
+                    print(e)
+        except Exception as e:
+            print(e)
 
     def map_functions(self):
         #self.webView.page().runJavaScript('addPoint(50.05925, 19.92293, 13, "aaa")')
@@ -278,6 +345,7 @@ class MainWidgetWindow(QWidget):
         return PlotG(typex, typey, dm)
 
     def __del__(self):
+
         with open('log1a.yml', 'w') as outfile:
             yaml.dump(self.data, outfile, default_flow_style=False)
 
@@ -309,7 +377,8 @@ class PlotG:
     def update(self):#updates plot on call
         self.sp.clear()
         tab=self.dm.get_by_id(self.ly, self.length)
-        self.sp.plot(range(0, len(tab)), tab)
+        tab2=self.dm.get_by_id(self.lx, self.length)
+        self.sp.plot(tab2, tab)
         #self.sp.plot(self.make_data(self.ly, data), self.make_data(self.lx, data))
         self.canvas.draw()
 
@@ -327,12 +396,19 @@ class PlotG:
         self.widget_layout.addLayout(self.button_layout, 1, 1)
         self.zoomin_button=QPushButton('+', self.widget)
         self.zoomout_button=QPushButton('-',self.widget)
+        self.save_button=QPushButton('S',self.widget)
+        self.pause_button=QPushButton('||',self.widget)
         self.zoomin_button.setMaximumSize(30, 30)
         self.zoomout_button.setMaximumSize(30, 30)
+        self.pause_button.setMaximumSize(30, 30)
+        self.save_button.setMaximumSize(30, 30)
         self.zoomin_button.clicked.connect(self._zoomin)
         self.zoomout_button.clicked.connect(self._zoomout)
         self.button_layout.addWidget(self.zoomin_button, 1, 0)
         self.button_layout.addWidget(self.zoomout_button, 2, 0)
+        self.button_layout.addWidget(self.pause_button, 3, 0)
+        self.button_layout.addWidget(self.save_button, 4, 0)
+
         return self.widget
 
     def _zoomin(self):
@@ -341,6 +417,46 @@ class PlotG:
 
     def _zoomout(self):
         self.length+=50
+
+
+class TimeControlWidget(QWidget):
+    def __init__(self, window):
+        super().__init__()
+        self.window = window
+        self.grid = QGridLayout()
+        self.setLayout(self.grid)
+        self.setFixedHeight(50)
+
+        self.left_button =QPushButton('<<')
+        self.left_button.setMaximumSize(30, 30)
+        self.left_button.clicked.connect(self.left_button_pushed)
+        self.grid.addWidget(self.left_button, 1, 0)
+
+        self.back_button =QPushButton('<')
+        self.back_button.setMaximumSize(30, 30)
+        self.back_button.setCheckable(True)
+        self.back_button.clicked.connect(self.left_button_pushed)
+        self.grid.addWidget(self.back_button, 1, 1)
+
+        self.pause_button =QPushButton('||')
+        self.pause_button.setMaximumSize(30, 30)
+        self.pause_button.setCheckable(True)
+        self.pause_button.clicked.connect(self.left_button_pushed)
+        self.grid.addWidget(self.pause_button, 1, 2)
+
+        self.forward_button =QPushButton('>')
+        self.forward_button.setMaximumSize(30, 30)
+        self.forward_button.setCheckable(True)
+        self.forward_button.clicked.connect(self.left_button_pushed)
+        self.grid.addWidget(self.forward_button, 1, 3)
+
+        self.right_button =QPushButton('>>')
+        self.right_button.setMaximumSize(30, 30)
+        self.right_button.clicked.connect(self.left_button_pushed)
+        self.grid.addWidget(self.right_button, 1, 4)
+
+    def left_button_pushed(self):
+        pass
 
 
 

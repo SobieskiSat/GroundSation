@@ -3,9 +3,25 @@ import serial.tools.list_ports
 import time
 import yaml
 
+class DataCreator:
+    def __init__(self, **kwargs):
+        self.kwargs=kwargs
+        self.structure = kwargs['structure']
+
+    def use_radio(self):
+        try:
+            self.radio = DataReader(self.structure, self.kwargs['radio'], call=self.outputter, **self.kwargs['kwargs'])
+        except Exception as e:
+            print(e)
+
+    def outputter(self, data):
+        pass
+
+
 class DataReader:
     def __init__(self, structure, radio, **kwargs):
         self.kwargs = kwargs
+        self.dataCounter=0
         self.structure = structure #structure of data received from satellite
         for s in self.structure: #check if every stucture has all attributes
             for p in ['id', 'text', 'num']:
@@ -42,8 +58,8 @@ class DataReader:
             second_condition=True
         while(condition):
             if(second_condition):
-                #line=self.radio.readline()
-                line=b'80_50.4482155_21.7964096_0.0_28.02_1003.46_8.3_9.2\r\n'
+                line=self.radio.readline()
+                #line=b'80_50.4482155_21.7964096_100.0_28.02_1003.46_8.3_9.2\r\n'
                 if lastLine!=line and ('call' in kwargs) and line!=None:
                     self._raw_data_sever(line)
                     line = self.parser(line, self.structure)
@@ -58,6 +74,8 @@ class DataReader:
             data = data.split("_")
             for s in st:
                 s['value']=data[s['num']]#set value of every structure
+        #st.append({'id': 'time', 'text':'Time:' , 'num': 8, 'value':self.dataCounter})
+        self.dataCounter+=1
         #print(st)
         return st
 

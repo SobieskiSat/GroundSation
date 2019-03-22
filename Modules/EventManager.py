@@ -41,12 +41,19 @@ class DataSaver:
 
     def write(self, data):
         self.file.write(str(time.time())+'_'+str(data)+'\n')
+        self.file.flush()
+        # typically the above line would do. however this is used to ensure that the file is written
+        os.fsync(self.file.fileno())
 
     def __call__(self, data):
+        #print(data)
         self.write(data)
 
-    def __del__(self):
+    def save(self):
         self.file.close()
+
+    def __del__(self):
+        pass
 
 class DataManager:
     def __init__(self, path):
@@ -64,6 +71,7 @@ class DataManager:
         path=self.path+'/'+str(num)
         try:
             os.makedirs(path)
+            #self.ds.save()
         except Exception as e:
             print(e)
         self.ds=DataSaver(path+'/raw.txt')
