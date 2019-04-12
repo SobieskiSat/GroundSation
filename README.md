@@ -1,2 +1,2 @@
-# GroundSation
-Code for ground staion of our project
+# GroundStation
+Code for ground station of our project
