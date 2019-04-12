@@ -37,6 +37,7 @@ class ConfigureConnectionWindow(QWidget):
 
         self.file=''
 
+
         self.logButttonGroup=QButtonGroup(self)
         self.port_label=QLabel('Port:')
         self.baudrate_label=QLabel('Baudrate:')
@@ -45,10 +46,13 @@ class ConfigureConnectionWindow(QWidget):
         self.event_manager_file_label=QLabel('Set Log File:')
         self.positionX_label=QLabel('Map focus X:')
         self.positionY_label=QLabel('Map focus Y:')
+        self.elevation_label=QLabel('Elevation (m.n.p.m):') #nowe
 
         self.baudrate_edit=QLineEdit()
         self.positionX_edit=QLineEdit()
         self.positionY_edit=QLineEdit()
+        self.elevation_edit=QLineEdit() #nowe
+
         self.baudrate_edit.setPlaceholderText('115200')
         self.timeout_edit=QLineEdit()
         self.event_manager_box=QCheckBox()
@@ -87,8 +91,13 @@ class ConfigureConnectionWindow(QWidget):
         self.form_grid.addWidget(self.positionX_edit, 6, 1)
         self.form_grid.addWidget(self.positionY_label, 7, 0)
         self.form_grid.addWidget(self.positionY_edit, 7, 1)
-        self.form_grid.addWidget(self.btn_connect, 8, 0)
-        self.form_grid.addWidget(self.btn_load, 8, 1)
+        self.form_grid.addWidget(self.elevation_label, 8, 0) #nowe
+        self.form_grid.addWidget(self.elevation_edit, 8, 1) #nowe
+        self.form_grid.addWidget(self.btn_connect, 9, 0)
+        self.form_grid.addWidget(self.btn_load, 9, 1)
+
+
+
         self.setLayout(self.form_grid)
 
 
@@ -105,7 +114,8 @@ class ConfigureConnectionWindow(QWidget):
         'use_event_manager':self.event_manager_box.checkState(),
         'file':self.file,
         'positionX':self.positionX_edit.text(),
-        'positionY':self.positionY_edit.text()}
+        'positionY':self.positionY_edit.text(),
+        'elevation':self.elevation_edit.text()}
         with open('last_connection.yml', 'w') as outfile:
             yaml.dump(self.response, outfile, default_flow_style=False)
         self.close()
@@ -130,6 +140,7 @@ class ConfigureConnectionWindow(QWidget):
             self.file=session['file']
             self.positionX_edit.setText(str(session['positionX']))
             self.positionY_edit.setText(str(session['positionY']))
+            self.elevation_edit.setText(str(session['elevation']))
 
 
 class MainWidgetWindow(QWidget):
@@ -137,6 +148,7 @@ class MainWidgetWindow(QWidget):
         super().__init__()
         self.dm=DataManager(1000)
         self.initUI(conf, labels)
+
     def initUI(self, conf, labels):
         self.labels={}
         self.conf=conf
@@ -312,7 +324,7 @@ class MainWidgetWindow(QWidget):
                 pred=self.conf['predictor'].predict([
                     self.dm.get_by_id('positionX', 50),
                     self.dm.get_by_id('positionY', 50),
-                    self.dm.get_by_id('altitude', 50)], 202)
+                    self.dm.get_by_id('altitude', 50)], conf.get("elevation")) #nowe zmiana stałej 202 na stałą ustalaną podczas startu programu w gui.py
                 try:
                     self.webView.page().runJavaScript('drawPrediction('+str(pred['x'])+', '+str(pred['y'])+', '+str(pred['r'])+')')
                 except Exception as e:
