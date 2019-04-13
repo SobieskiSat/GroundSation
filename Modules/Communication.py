@@ -74,7 +74,7 @@ class DataReader:
             data = data.split("_")
             for s in st:
                 if s['num']!=0:
-                    s['value']=data[s['num']+1]#set value of every structure (plus 1 => 0 is ignored by parser )
+                    s['value']=data[s['num']-1]#set value of every structure (plus 1 => 0 is ignored by parser )
         #st.append({'id': 'time', 'text':'Time:' , 'num': 8, 'value':self.dataCounter})
         self.dataCounter+=1
         #print(st)
