@@ -73,7 +73,8 @@ class DataReader:
         if(len(st)==data.count('_')+1): #check if data is OK
             data = data.split("_")
             for s in st:
-                s['value']=data[s['num']]#set value of every structure
+                if s['num']!=0:
+                    s['value']=data[s['num']+1]#set value of every structure (plus 1 => 0 is ignored by parser )
         #st.append({'id': 'time', 'text':'Time:' , 'num': 8, 'value':self.dataCounter})
         self.dataCounter+=1
         #print(st)
@@ -123,8 +124,6 @@ class Radio:
         self.lines=[]
         self.lines.append('Opening:')
         while(condition):
-            #line=self.readline()
-            #line=b'80_50.4482155_21.7964096_0.0_28.02_1003.46_8.3_9.2\r\n'
             time.sleep(interval)
             if self.lines[-1]!=line and 'call' in kwargs and line!=None:
                 line = self.parser(line)
@@ -135,40 +134,6 @@ class Radio:
         for d in list:
             if d[id_key]==id_value:
                 d[value_key]=value
-
-
-    def parser(self, data):
-        res=[{'id': 'rssi', 'text':'RSSI:' , 'value': '133'},
-        {'id':'positionX' , 'text': 'Pozycja X:' , 'value': '50.05925'},
-        {'id': 'positionY', 'text': 'Pozycja Y:' , 'value': '19.92293'},
-        {'id':'altitude' , 'text':'Wysokość:' , 'value': '1134'},
-        {'id': 'temperature', 'text':'Temperatura:' , 'value': '25'},
-        {'id': 'pressure', 'text':'Ciśnienie:' , 'value': '1115'},
-        {'id': 'pm25', 'text':'pm25:' , 'value': '133'},
-        {'id': 'pm10', 'text':'pm10:' , 'value': '133'}]
-
-        data=str(data[:-2])[2:-1]
-
-        #print(data)
-
-        data1=data.split("_")
-        data=data1
-        try:
-
-            self._set_dict_argument(res, 'id', 'rssi', 'value', str(data[0]))
-            self._set_dict_argument(res, 'id', 'temperature', 'value',str(data[4]))
-            self._set_dict_argument(res, 'id', 'pressure', 'value', str(data[5]))
-            self._set_dict_argument(res, 'id', 'positionX', 'value', str(data[1]))
-            self._set_dict_argument(res, 'id', 'positionY', 'value', str(data[2]))
-            self._set_dict_argument(res, 'id', 'altitude', 'value', str(data[3]))
-            self._set_dict_argument(res, 'id', 'pm25', 'value', str(data[6]))
-            self._set_dict_argument(res, 'id', 'pm10', 'value', str(data[7]))
-        except Exception:
-            pass
-        #print(type(data))
-        #print(data1)
-        return res
-
 
     def close(self):
         if(hasattr(self, 'ser')):

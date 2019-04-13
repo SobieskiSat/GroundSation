@@ -144,12 +144,12 @@ class ConfigureConnectionWindow(QWidget):
 
 
 class MainWidgetWindow(QWidget):
-    def __init__(self, conf, labels):
+    def __init__(self, conf):
         super().__init__()
         self.dm=DataManager(1000)
-        self.initUI(conf, labels)
+        self.initUI(conf)
 
-    def initUI(self, conf, labels):
+    def initUI(self, conf):
         self.labels={}
         self.conf=conf
         labels=conf['labels']

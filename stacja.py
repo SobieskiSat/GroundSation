@@ -44,15 +44,7 @@ def main_window(app, conf):
     conf['dm']=dm
     conf['labels']=structure
     conf['predictor']=predictor
-    win=MainWidgetWindow(conf,[{'id': 'rssi', 'text':'RSSI:' , 'value': None},
-    {'id':'positionX' , 'text': 'Pozycja X:' , 'value': None},
-    {'id': 'positionY', 'text': 'Pozycja Y:' , 'value': None},
-    {'id':'altitude' , 'text':'Wysokość:' , 'value': None},
-    {'id': 'temperature', 'text':'Temperatura:' , 'value': None},
-    {'id': 'pressure', 'text':'Ciśnienie:' , 'value': None},
-    {'id': 'pm25', 'text':'PM-2,5:' , 'value': None},
-    {'id': 'pm10', 'text':'PM-10:' , 'value': None}
-    ])
+    win=MainWidgetWindow(conf)
 
     reader = threading.Thread(target=dr.keepReading, args=(True, ), kwargs={'call':win.update,})
     reader.start()
