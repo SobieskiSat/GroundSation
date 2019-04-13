@@ -153,7 +153,7 @@ class MainWidgetWindow(QWidget):
         self.labels={}
         self.conf=conf
         labels=conf['labels']
-
+        labels[0].update({'value': conf.get("elevation") }) #dodawanie value do "elevation"
 
         '''
         self.locationX_label=QLabel('Pozycja X:')
@@ -190,8 +190,8 @@ class MainWidgetWindow(QWidget):
         self.vertical_splitter=QSplitter(QtCore.Qt.Vertical)
         self.vertical_splitter.addWidget(self.top_splitter)
         self.vertical_splitter.addWidget(self.bottom_widget)
-
         self.info_grid.setSpacing(10)
+
         elements=len(labels)
         if elements%2==0:
             elements=elements/2
@@ -204,8 +204,14 @@ class MainWidgetWindow(QWidget):
             else:
                 k=i-elements
                 j=3
-            self.labels[labels[i]['id']]={'text':QLabel(labels[i]['text']),
-            'value':QLabel('-')}
+
+            if labels[i]['num'] != 0:
+                self.labels[labels[i]['id']]={'text':QLabel(labels[i]['text']),
+                'value':QLabel('-')}
+            else:
+                self.labels[labels[i]['id']]={'text':QLabel(labels[i]['text']),
+                'value':QLabel(labels[i]['value'])}
+
             self.info_grid.addWidget(self.labels[labels[i]['id']]['text'], k+1, j)
             self.info_grid.addWidget(self.labels[labels[i]['id']]['value'], k+1, j+1)
 

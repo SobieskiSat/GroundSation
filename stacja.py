@@ -29,14 +29,15 @@ def main_window(app, conf):
     }
 
     structure = [
-    {'id': 'rssi', 'text':'RSSI:' , 'num': 0},
-    {'id':'positionX' , 'text': 'Pozycja X:' , 'num': 1},
-    {'id': 'positionY', 'text': 'Pozycja Y:' , 'num': 2},
-    {'id':'altitude' , 'text':'Wysokość:' , 'num': 3},
+    {'id': 'elevation', 'text':'Start elevation:' , 'num': 0},
+    {'id': 'rssi', 'text':'RSSI:' , 'num': 1},
+    {'id':'positionX' , 'text': 'Pozycja X:' , 'num': 2},
+    {'id': 'positionY', 'text': 'Pozycja Y:' , 'num': 3},
+    {'id':'altitude' , 'text':'Wysokość:' , 'num': 4},
     {'id': 'temperature', 'text':'Temperatura:' , 'num': 5},
-    {'id': 'pressure', 'text':'Ciśnienie:' , 'num': 4},
-    {'id': 'pm25', 'text':'PM-2,5:' , 'num': 6},
-    {'id': 'pm10', 'text':'PM-10:' , 'num': 7}
+    {'id': 'pressure', 'text':'Ciśnienie:' , 'num': 6},
+    {'id': 'pm25', 'text':'PM-2,5:' , 'num': 7},
+    {'id': 'pm10', 'text':'PM-10:' , 'num': 8}
 
     ]
 
