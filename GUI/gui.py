@@ -219,7 +219,7 @@ class MainWidgetWindow(QWidget):
         frame=QFrame()
         frame.setFrameShape(QFrame.VLine)
         self.info_grid.addWidget(frame, 1, 3, elements, 1)
-        cwd = os.getcwd()+"\maps\map.html"
+        cwd = os.getcwd()+"/maps/map.html"
         self.webView = QtWebEngineWidgets.QWebEngineView()
         self.webView.setUrl(QtCore.QUrl(cwd))    #MAPS PATH
 
