@@ -1,6 +1,7 @@
 import sys
 import yaml
 import copy
+import os
 from PyQt5 import QtWebEngineWidgets, QtCore
 from PyQt5.QtWidgets import (QWidget, QPushButton, QLineEdit, QFrame,
 QDialog, QApplication, QComboBox, QLabel, QCheckBox, QGridLayout, QFileDialog,
@@ -218,9 +219,11 @@ class MainWidgetWindow(QWidget):
         frame=QFrame()
         frame.setFrameShape(QFrame.VLine)
         self.info_grid.addWidget(frame, 1, 3, elements, 1)
-
+        cwd = os.getcwd()+"\maps\map.html"
         self.webView = QtWebEngineWidgets.QWebEngineView()
-        self.webView.setUrl(QtCore.QUrl("D:\Projekty\Programowanide\CanSat\stacja\maps\map.html"))
+        self.webView.setUrl(QtCore.QUrl(cwd))    #MAPS PATH
+
+
         #self.webView.page.run
         #page().runJavaScript("[map.getBounds().getSouthWest().lat, map.getBounds().getSouthWest().lng, map.getBounds().getNorthEast().lat, map.getBounds().getNorthEast().lng]")
         self.top_grid.addWidget(self.webView, 1,1)

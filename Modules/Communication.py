@@ -59,7 +59,7 @@ class DataReader:
         while(condition):
             if(second_condition):
                 line=self.radio.readline()
-                #line=b'80_50.4482155_21.7964096_100.0_28.02_1003.46_8.3_9.2\r\n'
+            #    line=b'80_50.4482155_21.7964096_100.0_28.02_1003.46_8.3_9.2\r\n'
                 if lastLine!=line and ('call' in kwargs) and line!=None:
                     self._raw_data_sever(line)
                     line = self.parser(line, self.structure)
@@ -70,7 +70,7 @@ class DataReader:
     def parser(self, data, structure):
         st = self.structure
         data=str(data[:-2])[2:-1]
-        if(len(st)==data.count('_')+1): #check if data is OK
+        if(len(st)==data.count('_')+2): #check if data is OK, THERE MUST BE 2
             data = data.split("_")
             for s in st:
                 if s['num']!=0:
