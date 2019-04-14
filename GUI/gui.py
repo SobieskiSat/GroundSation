@@ -334,7 +334,7 @@ class MainWidgetWindow(QWidget):
                 pred=self.conf['predictor'].predict([
                     self.dm.get_by_id('positionX', 50),
                     self.dm.get_by_id('positionY', 50),
-                    self.dm.get_by_id('altitude', 50)], conf.get("elevation")) #nowe zmiana stałej 202 na stałą ustalaną podczas startu programu w gui.py
+                    self.dm.get_by_id('altitude', 50)], float(self.conf.get("elevation"))) #nowe zmiana stałej 202 na stałą ustalaną podczas startu programu w gui.py
                 try:
                     self.webView.page().runJavaScript('drawPrediction('+str(pred['x'])+', '+str(pred['y'])+', '+str(pred['r'])+')')
                 except Exception as e:
