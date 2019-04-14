@@ -54,7 +54,8 @@ class ConfigureConnectionWindow(QWidget):
         self.positionY_edit=QLineEdit()
         self.elevation_edit=QLineEdit() #nowe
 
-        self.baudrate_edit.setPlaceholderText('115200')
+        self.baudrate_edit.setText('115200') #to jest faktycznie wpisany tekst
+        #self.baudrate_edit.setPlaceholderText('115200') #to jest taka podpowiedź w stylu co tam ma być
         self.timeout_edit=QLineEdit()
         self.event_manager_box=QCheckBox()
         self.event_manager_box.stateChanged.connect(self.event_manager_box_changed)
@@ -333,7 +334,7 @@ class MainWidgetWindow(QWidget):
                 pred=self.conf['predictor'].predict([
                     self.dm.get_by_id('positionX', 50),
                     self.dm.get_by_id('positionY', 50),
-                    self.dm.get_by_id('altitude', 50)], conf.get("elevation")) #nowe zmiana stałej 202 na stałą ustalaną podczas startu programu w gui.py
+                    self.dm.get_by_id('altitude', 50)], float(self.conf.get("elevation"))) #nowe zmiana stałej 202 na stałą ustalaną podczas startu programu w gui.py
                 try:
                     self.webView.page().runJavaScript('drawPrediction('+str(pred['x'])+', '+str(pred['y'])+', '+str(pred['r'])+')')
                 except Exception as e:

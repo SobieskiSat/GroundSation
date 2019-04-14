@@ -41,12 +41,15 @@
 
 */
 	function addPoint(x, y, rrsi, text){
-		var red=Math.abs(rrsi*2);
+		var red=Math.round(Math.abs(rrsi*2));
 		var green=255-red;
 		if(red>255)red=255;
 		if(green<0)green=0;
 		L.circle([x, y], 3, {
 			color: 'rgb('+red+','+green+',0)',
+	//		color: 'rgb(100,100,0)',
+
+
 			//fillColor:  'rgb('+red+','+green+',0)',
 			fillOpacity: 1
 		}).addTo(mymap).bindPopup(text);
