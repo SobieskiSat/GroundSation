@@ -44,6 +44,9 @@ class Predictor:
         dx=dx/dh#x per one meter altitude
         dy=dy/dh
 
+        dx=dx/2      #testowanie lepszej aproksymacji
+        dy=dy/2      #testowanie lepszej aproksymacji
+
         new_x=x[-1]-dx*h[-1]
         new_y=y[-1]-dy*h[-1]
 
