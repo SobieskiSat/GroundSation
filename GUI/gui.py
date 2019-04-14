@@ -54,7 +54,8 @@ class ConfigureConnectionWindow(QWidget):
         self.positionY_edit=QLineEdit()
         self.elevation_edit=QLineEdit() #nowe
 
-        self.baudrate_edit.setPlaceholderText('115200')
+        self.baudrate_edit.setText('115200') #to jest faktycznie wpisany tekst
+        #self.baudrate_edit.setPlaceholderText('115200') #to jest taka podpowiedź w stylu co tam ma być
         self.timeout_edit=QLineEdit()
         self.event_manager_box=QCheckBox()
         self.event_manager_box.stateChanged.connect(self.event_manager_box_changed)
