@@ -24,6 +24,8 @@ class Predictor:
 
         count_len = int(len(x)/5)#first and last 1/5 of data
         #print(len(x))
+
+        '''
         for t in [x, y, h]: #average of all axis
             counter=0
             for d in t[count_len:]:
@@ -33,6 +35,7 @@ class Predictor:
             for d in t[-count_len:]:
                 counter+=d
             t[-1]=counter/count_len
+        '''
 
         dh=h[0]-h[-1]#delta h
         dx=x[0]-x[-1]
@@ -41,8 +44,11 @@ class Predictor:
         dx=dx/dh#x per one meter altitude
         dy=dy/dh
 
-        new_x=dx*h[-1]
-        new_y=dy*h[-1]
+        dx=dx/2      #testowanie lepszej aproksymacji
+        dy=dy/2      #testowanie lepszej aproksymacji
+
+        new_x=x[-1]-dx*h[-1]
+        new_y=y[-1]-dy*h[-1]
 
         return {'x':new_x, 'y':new_y, 'r':h[-1]/7}
 
