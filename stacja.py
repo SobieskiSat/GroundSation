@@ -31,7 +31,7 @@ def main_window(app, conf):
 
     structure = [
     {'id': 'elevation', 'text':'Start elevation:' , 'num': 0},
-    {'id': 'time', 'text':'Time:' , 'num': 0},
+    {'id': 'time', 'text':'Time:' , 'num': 9},
     {'id': 'rssi', 'text':'RSSI:' , 'num': 1},
     {'id':'positionX' , 'text': 'Pozycja X:' , 'num': 2},
     {'id': 'positionY', 'text': 'Pozycja Y:' , 'num': 3},
