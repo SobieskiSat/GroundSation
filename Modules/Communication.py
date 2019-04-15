@@ -2,6 +2,7 @@ import serial
 import serial.tools.list_ports
 import time
 import yaml
+import copy
 
 class DataCreator:
     def __init__(self, **kwargs):
@@ -70,12 +71,14 @@ class DataReader:
     def parser(self, data, structure):
         st = self.structure
         data=str(data[:-2])[2:-1]
-        if(len(st)==data.count('_')+2): #check if data is OK, THERE MUST BE 2
+        print(data)
+        if(len(st)==data.count('_')+3): #check if data is OK, THERE MUST BE 2
             data = data.split("_")
+            data.append(str(self.dataCounter))
             for s in st:
                 if s['num']!=0:
                     s['value']=data[s['num']-1]#set value of every structure (plus 1 => 0 is ignored by parser )
-        #st.append({'id': 'time', 'text':'Time:' , 'num': 8, 'value':self.dataCounter})
+
         self.dataCounter+=1
         #print(st)
         return st

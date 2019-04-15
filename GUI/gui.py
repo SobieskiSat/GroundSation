@@ -207,12 +207,10 @@ class MainWidgetWindow(QWidget):
                 k=i-elements
                 j=3
 
-            if labels[i]['num'] != 0:
-                self.labels[labels[i]['id']]={'text':QLabel(labels[i]['text']),
-                'value':QLabel('-')}
-            else:
-                self.labels[labels[i]['id']]={'text':QLabel(labels[i]['text']),
-                'value':QLabel(labels[i]['value'])}
+
+            self.labels[labels[i]['id']]={'text':QLabel(labels[i]['text']),
+            'value':QLabel('-')}
+
 
             self.info_grid.addWidget(self.labels[labels[i]['id']]['text'], k+1, j)
             self.info_grid.addWidget(self.labels[labels[i]['id']]['value'], k+1, j+1)
