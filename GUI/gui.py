@@ -226,8 +226,8 @@ class MainWidgetWindow(QWidget):
         #self.webView.page.run
         #page().runJavaScript("[map.getBounds().getSouthWest().lat, map.getBounds().getSouthWest().lng, map.getBounds().getNorthEast().lat, map.getBounds().getNorthEast().lng]")
         self.top_grid.addWidget(self.webView, 1,1)
-        self.left_plot=self.draw_plot('altitude', 'pressure', self.dm)
-        self.right_plot=self.draw_plot('pressure', 'rssi', self.dm)
+        self.left_plot=self.draw_plot('time', 'altitude', self.dm)
+        self.right_plot=self.draw_plot('time', 'pressure', self.dm)
         self.bottom_grid.addWidget(self.left_plot.get_widget(), 1,0)
         self.bottom_grid.addWidget(self.right_plot.get_widget(), 1,1)
         self.webView.loadFinished.connect(self.webView_loaded_event)
@@ -241,14 +241,15 @@ class MainWidgetWindow(QWidget):
         self.option_grid.addWidget(self.center_map_button, 1, 1)
 
         self.left_plot_box = QComboBox(self)
-        self.left_plot_box.addItem('altitude/pressure')
-        self.left_plot_box.addItem('positionX/positionY')
+        self.left_plot_box.addItem('time/altitude')
+        self.left_plot_box.addItem('time/positionY')
 
         self.left_plot_box.currentIndexChanged.connect(self.change_plots)
 
         self.right_plot_box = QComboBox(self)
-        self.right_plot_box.addItem('pressure/rssi')
-        self.right_plot_box.addItem('rssi/elevation')
+        self.right_plot_box.addItem('time/pressure')
+        self.right_plot_box.addItem('time/rssi')
+        self.right_plot_box.addItem('time/positionX')
 
         self.right_plot_box.currentIndexChanged.connect(self.change_plots)
 

@@ -71,7 +71,7 @@ class DataReader:
     def parser(self, data, structure):
         st = self.structure
         data=str(data[:-2])[2:-1]
-        print(data)
+        #print(data)
         if(len(st)==data.count('_')+3): #check if data is OK, THERE MUST BE 2
             data = data.split("_")
             data.append(str(self.dataCounter))
