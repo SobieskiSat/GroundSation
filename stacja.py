@@ -5,6 +5,7 @@ from Modules.Prediction import Predictor
 import sys
 from PyQt5.QtWidgets import QApplication
 import threading
+import time
 
 
 
@@ -30,6 +31,7 @@ def main_window(app, conf):
 
     structure = [
     {'id': 'elevation', 'text':'Start elevation:' , 'num': 0},
+    {'id': 'time', 'text':'Time:' , 'num': 0},
     {'id': 'rssi', 'text':'RSSI:' , 'num': 1},
     {'id':'positionX' , 'text': 'Pozycja X:' , 'num': 2},
     {'id': 'positionY', 'text': 'Pozycja Y:' , 'num': 3},
@@ -45,6 +47,7 @@ def main_window(app, conf):
     conf['dm']=dm
     conf['labels']=structure
     conf['predictor']=predictor
+    conf['time']=get_time
     win=MainWidgetWindow(conf)
 
     reader = threading.Thread(target=dr.keepReading, args=(True, ), kwargs={'call':win.update,})
@@ -54,8 +57,10 @@ def main_window(app, conf):
 def call_update(data):
     print(data)
 
-def new_connection(app
-):
+def get_time():
+    return time.time()
+
+def new_connection(app):
     serials=SerialLoader().all_serials()
     names=[]
     for s in serials:
@@ -68,6 +73,7 @@ def new_connection(app
 r=Radio(port='COM11')
 r.keepReading(condition=True, call=print)
 '''
+
 app = QApplication(sys.argv)
 win = OpenWindow()
 app.exec_()
