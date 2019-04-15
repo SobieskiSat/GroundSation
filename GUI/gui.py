@@ -243,16 +243,16 @@ class MainWidgetWindow(QWidget):
         self.option_grid.addWidget(self.center_map_button, 1, 1)
 
         self.left_plot_box = QComboBox(self)
-        self.left_plot_box.addItem('Pressure / Time')
-        self.left_plot_box.addItem('RSSI / Time')
+        self.left_plot_box.addItem('altitude/pressure')
+        self.left_plot_box.addItem('positionX/positionY')
 
         self.left_plot_box.currentIndexChanged.connect(self.change_plots)
 
         self.right_plot_box = QComboBox(self)
-        self.right_plot_box.addItem('pressure/time')
-        self.right_plot_box.addItem('RSSI/time')
+        self.right_plot_box.addItem('pressure/rssi')
+        self.right_plot_box.addItem('rssi/elevation')
 
-        self.left_plot_box.currentIndexChanged.connect(self.change_plots)
+        self.right_plot_box.currentIndexChanged.connect(self.change_plots)
 
 
         self.left_plot_box_label = QLabel('Left Plot')
@@ -288,13 +288,16 @@ class MainWidgetWindow(QWidget):
     def change_plots(self):
 
 
-        left = self.left_plot_box.currentText
-        left.split('/')
-        ll=left[0]
-        lr=left[1]
-        rl=left[0]
-        rr=left[1]
-        self.plot.lx = left[0]
+        left = self.left_plot_box.currentText()
+        right = self.right_plot_box.currentText()
+        left=left.split('/')
+        right=right.split('/')
+
+        self.left_plot.lx = left[0]
+        self.left_plot.ly = left[1]
+        self.right_plot.lx = right[0]
+        self.right_plot.ly = right[1]
+
     def center_map(self):
         posX=str(self.dm.get_by_id('positionX', 1)[0])
         posY=str(self.dm.get_by_id('positionY', 1)[0])
