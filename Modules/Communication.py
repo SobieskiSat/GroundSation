@@ -150,22 +150,4 @@ class Radio:
 class SerialLoader:
     def all_serials(self):
         return serial.tools.list_ports.comports()#{device, name, description, ...}
-
-
-#print(SerialLoader().all_serials())
-'''
-r=Radio()
-r.keepReading(True,call=print)
-'''
-'''
-with serial.Serial('COM9', 115200, timeout=1 ) as ser:
-
-    print(ser.readline())
-
-ser = serial.Serial
-ser.baudrate = 115200
-ser.port='COM9'
-ser.open()
-while(True):
-    print(ser.read(256))
-'''
+        

@@ -51,28 +51,3 @@ class Predictor:
         new_y=y[-1]-dy*h[-1]
 
         return {'x':new_x, 'y':new_y, 'r':h[-1]/7}
-
-
-'''
-p=Predictor()
-p.plot()
-p.predict_from_data(2180, 2200, 0)
-'''
-'''
-filename = 'data1.txt'
-with open(filename) as f:
-    data = f.readlines()
-x=[]
-y=[]
-z=[]
-for d in data:
-    try:
-        b=d.split(' ')
-        x.append(float(l[3]))
-        y.append(float(l[4]))
-        z.append(float(l[5]))
-    except Exception:
-        pass
-plt.plot(z)
-plt.show()
-'''
