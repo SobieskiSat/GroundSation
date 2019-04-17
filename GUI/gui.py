@@ -5,12 +5,61 @@ import os
 from PyQt5 import QtWebEngineWidgets, QtCore
 from PyQt5.QtWidgets import (QWidget, QPushButton, QLineEdit, QFrame,
 QDialog, QApplication, QComboBox, QLabel, QCheckBox, QGridLayout, QFileDialog,
-QHBoxLayout, QVBoxLayout, QSplitter, QRadioButton, QButtonGroup)
+QHBoxLayout, QVBoxLayout, QSplitter, QRadioButton, QButtonGroup, QTabWidget)
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 from random import randint#nie potrzebne
+
+class ConfiguratorWindow(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.initUI()
+
+    def initUI(self):
+        self.main_grid = QGridLayout()
+        self.tabs = QTabWidget()
+
+        self.radio_tab = QWidget()
+        self.parser_tab = QWidget()
+        self.tabs.addTab(self.radio_tab, 'Radio')
+        self.tabs.addTab(self.parser_tab, 'Parser')
+
+        #### Radio tab
+
+        self.radio_layout = QGridLayout()
+        self.r_port_label=QLabel('Port:')
+        self.r_baudrate_label=QLabel('Baudrate:')
+        self.r_timeout_label=QLabel('Timeout:')
+        self.r_baudrate_edit=QLineEdit()
+        self.r_port_edit=QLineEdit()
+        self.r_timeout_edit=QLineEdit()
+
+        self.radio_layout.addWidget(self.r_port_label, 1, 0)
+        self.radio_layout.addWidget(self.r_port_edit, 1, 1)
+        self.radio_layout.addWidget(self.r_baudrate_label, 2, 0)
+        self.radio_layout.addWidget(self.r_baudrate_edit, 2, 1)
+        self.radio_layout.addWidget(self.r_timeout_label, 3, 0)
+        self.radio_layout.addWidget(self.r_timeout_edit, 3, 1)
+
+        self.radio_tab.setLayout(self.radio_layout)
+
+
+        self.main_grid.addWidget(self.tabs, 0, 0)
+
+        self.setLayout(self.main_grid)
+
+    def save(self):
+        structure={
+        'baudrate':self.r_baudrate_edit.text(),
+        'port':self.r_port_edit.text(),
+        'timeout':self.r_baudrate_edit.text()
+        }
+        
+
+
+
 
 class OpenWindow(QWidget):
     def __init__(self):
@@ -535,3 +584,8 @@ app.exec_()
 
 print('ok')
 '''
+
+app=QApplication(sys.argv)
+win=ConfiguratorWindow()
+win.show()
+app.exec_()

@@ -28,19 +28,6 @@ class Configurator:
     def get(self, key):
         return self.__getitem__(key)
 
-structure = [
-{'id': 'elevation', 'text':'Start elevation:' , 'num': 0},
-{'id': 'time', 'text':'Time:' , 'num': 9},
-{'id': 'rssi', 'text':'RSSI:' , 'num': 1},
-{'id':'positionX' , 'text': 'Pozycja X:' , 'num': 2},
-{'id': 'positionY', 'text': 'Pozycja Y:' , 'num': 3},
-{'id':'altitude' , 'text':'Wysokość:' , 'num': 4},
-{'id': 'pressure', 'text':'Ciśnienie:' , 'num': 5},
-{'id': 'temperature', 'text':'Temperatura:' , 'num': 6},
-{'id': 'pm25', 'text':'PM-2,5:' , 'num': 7},
-{'id': 'pm10', 'text':'PM-10:' , 'num': 8}
-]
-
 conf = Configurator('config.yaml')
 conf['labels']=structure
 app = QApplication(sys.argv)
