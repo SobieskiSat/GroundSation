@@ -156,6 +156,7 @@ class MainWidgetWindow(QWidget):
         self.conf=conf
         labels=conf['labels']
         labels[0].update({'value': conf.get("elevation") }) #dodawanie value do "elevation"
+        items=['time/rssi','time/positionX','time/positionY','time/temperature','time/pressure','time/altitude','time/pm25','time/pm10']
 
         '''
         self.locationX_label=QLabel('Pozycja X:')
@@ -241,15 +242,12 @@ class MainWidgetWindow(QWidget):
         self.option_grid.addWidget(self.center_map_button, 1, 1)
 
         self.left_plot_box = QComboBox(self)
-        self.left_plot_box.addItem('time/altitude')
-        self.left_plot_box.addItem('time/positionY')
+        self.left_plot_box.addItems(items) #dodawanie listy wykresów
 
         self.left_plot_box.currentIndexChanged.connect(self.change_plots)
 
         self.right_plot_box = QComboBox(self)
-        self.right_plot_box.addItem('time/pressure')
-        self.right_plot_box.addItem('time/rssi')
-        self.right_plot_box.addItem('time/positionX')
+        self.right_plot_box.addItems(items) #dodawanie listy wykresów
 
         self.right_plot_box.currentIndexChanged.connect(self.change_plots)
 

@@ -36,8 +36,8 @@ def main_window(app, conf):
     {'id':'positionX' , 'text': 'Pozycja X:' , 'num': 2},
     {'id': 'positionY', 'text': 'Pozycja Y:' , 'num': 3},
     {'id':'altitude' , 'text':'Wysokość:' , 'num': 4},
-    {'id': 'temperature', 'text':'Temperatura:' , 'num': 5},
-    {'id': 'pressure', 'text':'Ciśnienie:' , 'num': 6},
+    {'id': 'pressure', 'text':'Ciśnienie:' , 'num': 5},
+    {'id': 'temperature', 'text':'Temperatura:' , 'num': 6},
     {'id': 'pm25', 'text':'PM-2,5:' , 'num': 7},
     {'id': 'pm10', 'text':'PM-10:' , 'num': 8}
 
