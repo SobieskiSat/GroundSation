@@ -368,10 +368,11 @@ class MainWidgetWindow(QWidget):
         return PlotG(typex, typey, dm)
 
     def __del__(self):
-
+        pass
+        '''
         with open('log1a.yml', 'w') as outfile:
             yaml.dump(self.data, outfile, default_flow_style=False)
-
+        '''
 
 
 class PlotG:
