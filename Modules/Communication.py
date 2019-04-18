@@ -150,4 +150,3 @@ class Radio:
 class SerialLoader:
     def all_serials(self):
         return serial.tools.list_ports.comports()#{device, name, description, ...}
-        

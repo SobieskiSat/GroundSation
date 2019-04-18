@@ -11,6 +11,7 @@ import yaml
 class Configurator:
     def __init__(self, file):
         self.file = file
+        self.data = {}
         try:
             with open(file, 'r') as stream:
                 self.data=yaml.load(stream)
@@ -19,6 +20,9 @@ class Configurator:
 
     def __setitem__(self, key, value):
         self.data[key]=value
+        self.save()
+
+    def save(self):
         with open(self.file, 'w') as outfile:
             yaml.dump(self.data, outfile, default_flow_style=False)
 
@@ -28,8 +32,34 @@ class Configurator:
     def get(self, key):
         return self.__getitem__(key)
 
+    def update(self, new):
+        self.data.update(new)
+        self.save()
+
+    def all(self):
+        return self.data
+
+    def __str__(self):
+        return str(self.data)
+
+def new_reader(info, call):
+    if info['type'] == 'radio':
+        radio={
+        'port':info['port'],
+        'baudrate':info['baudrate'],
+        'timeout':info['timeout']
+        }
+        dr=DataReader(info['labels'], radio, event_manager = info['em'], rds=info['rds'])
+        reader = threading.Thread(target=dr.keepReading, args=(True, ), kwargs={'call':call,})
+
 conf = Configurator('config.yaml')
-conf['labels']=structure
+dm=DataManager(None)
+em=dm.em
+rds=dm.ds
+print(conf)
+conf['dm'] = dm
+conf['rds'] = rds
+conf['em'] = em
 app = QApplication(sys.argv)
-win = MainWidgetWindow(conf)
+win = MainWidgetWindow(conf, new_reader)
 app.exec_()

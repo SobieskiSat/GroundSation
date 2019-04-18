@@ -13,9 +13,15 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from random import randint#nie potrzebne
 
 class ConfiguratorWindow(QWidget):
-    def __init__(self):
+    def __init__(self, conf):
         super().__init__()
         self.initUI()
+        self.conf = conf
+        self.structure={
+        'baudrate':self.r_baudrate_edit,
+        'port':self.r_port_edit,
+        'timeout':self.r_baudrate_edit
+        }
 
     def initUI(self):
         self.main_grid = QGridLayout()
@@ -30,33 +36,66 @@ class ConfiguratorWindow(QWidget):
 
         self.radio_layout = QGridLayout()
         self.r_port_label=QLabel('Port:')
+        self.r_autoport_label=QLabel('Automatic Port Finder:')
         self.r_baudrate_label=QLabel('Baudrate:')
         self.r_timeout_label=QLabel('Timeout:')
         self.r_baudrate_edit=QLineEdit()
         self.r_port_edit=QLineEdit()
+        self.r_autoport_edit=QCheckBox()
         self.r_timeout_edit=QLineEdit()
 
         self.radio_layout.addWidget(self.r_port_label, 1, 0)
         self.radio_layout.addWidget(self.r_port_edit, 1, 1)
-        self.radio_layout.addWidget(self.r_baudrate_label, 2, 0)
-        self.radio_layout.addWidget(self.r_baudrate_edit, 2, 1)
-        self.radio_layout.addWidget(self.r_timeout_label, 3, 0)
-        self.radio_layout.addWidget(self.r_timeout_edit, 3, 1)
+        self.radio_layout.addWidget(self.r_autoport_label, 2, 0)
+        self.radio_layout.addWidget(self.r_autoport_edit, 2, 1)
+        self.radio_layout.addWidget(self.r_baudrate_label, 3, 0)
+        self.radio_layout.addWidget(self.r_baudrate_edit, 3, 1)
+        self.radio_layout.addWidget(self.r_timeout_label, 4, 0)
+        self.radio_layout.addWidget(self.r_timeout_edit, 4, 1)
 
         self.radio_tab.setLayout(self.radio_layout)
 
-
         self.main_grid.addWidget(self.tabs, 0, 0)
 
+        self.bottom_grid = QGridLayout()
+        self.save_button = QPushButton('Save')
+        self.save_button.clicked.connect(self.save)
+
+        self.bottom_grid.addWidget(self.save_button, 0, 3)
+        self.main_grid.addLayout(self.bottom_grid, 1, 0)
+
+
         self.setLayout(self.main_grid)
+        #print(isinstance(self.r_port_edit, QLineEdit)) sprawdzanie typu
 
     def save(self):
-        structure={
-        'baudrate':self.r_baudrate_edit.text(),
-        'port':self.r_port_edit.text(),
-        'timeout':self.r_baudrate_edit.text()
-        }
-        
+        new={}
+        for k,v in self.structure.items():
+            if isinstance(v, QLineEdit):
+                new[k] = v.text()
+            elif isinstance(v, QComboBox):
+                new[k] = v.currentText()
+            elif isinstance(v, QCheckBox):
+                new[k] = v.checkState()
+            ### Dodać Obsługę Pliki
+
+        self.conf.update(new)
+
+    def load(self):
+        for k,v in self.structure.items():
+            if k in data:
+                try:
+                    if isinstance(v, QLineEdit):
+                        v.setText(str(data[k]))
+                    elif isinstance(v, QCheckBox):
+                        v.setChecked(data[k])
+                    elif isinstance(v, QComboBox):
+                        v.setCurrentText(str(data[k]))#może nie działać
+                except Exception as e:
+                    print(e)
+
+
+
 
 
 
@@ -195,17 +234,20 @@ class ConfigureConnectionWindow(QWidget):
 
 
 class MainWidgetWindow(QWidget):
-    def __init__(self, conf):
+    def __init__(self, conf, reader):
         super().__init__()
+        self.reader = reader
         self.dm=DataManager(1000)
         self.initUI(conf)
 
     def initUI(self, conf):
         self.labels={}
         self.conf=conf
+        #### Do wyrzucenia
         labels=conf['labels']
-        labels[0].update({'value': conf.get("elevation") }) #dodawanie value do "elevation"
+        #labels[0].update({'value': conf.get("elevation") }) #dodawanie value do "elevation"
         items=['time/rssi','time/positionX','time/positionY','time/temperature','time/pressure','time/altitude','time/pm25','time/pm10']
+
 
         '''
         self.locationX_label=QLabel('Pozycja X:')
@@ -243,7 +285,7 @@ class MainWidgetWindow(QWidget):
         self.vertical_splitter.addWidget(self.top_splitter)
         self.vertical_splitter.addWidget(self.bottom_widget)
         self.info_grid.setSpacing(10)
-
+        '''
         elements=len(labels)
         if elements%2==0:
             elements=elements/2
@@ -268,6 +310,7 @@ class MainWidgetWindow(QWidget):
         frame=QFrame()
         frame.setFrameShape(QFrame.VLine)
         self.info_grid.addWidget(frame, 1, 3, elements, 1)
+        '''
         cwd = os.getcwd()+"/maps/map.html"
         self.webView = QtWebEngineWidgets.QWebEngineView()
         self.webView.setUrl(QtCore.QUrl(cwd))    #MAPS PATH
@@ -290,6 +333,13 @@ class MainWidgetWindow(QWidget):
         self.option_grid.addWidget(self.new_flight_button, 1, 0)
         self.option_grid.addWidget(self.center_map_button, 1, 1)
 
+        self.load_button=QPushButton('Load Flight', self)
+        self.load_button.clicked.connect(self.load_flight)
+        self.configuration_button=QPushButton('Configuration', self)
+        self.configuration_button.clicked.connect(self.open_configuration)
+        self.option_grid.addWidget(self.load_button, 2, 0)
+        self.option_grid.addWidget(self.configuration_button, 2, 1)
+
         self.left_plot_box = QComboBox(self)
         self.left_plot_box.addItems(items) #dodawanie listy wykresów
 
@@ -304,10 +354,10 @@ class MainWidgetWindow(QWidget):
         self.left_plot_box_label = QLabel('Left Plot')
         self.right_plot_box_label = QLabel('Right Plot')
 
-        self.option_grid.addWidget(self.left_plot_box_label, 2, 0)
-        self.option_grid.addWidget(self.left_plot_box, 2, 1)
-        self.option_grid.addWidget(self.right_plot_box_label, 3, 0)
-        self.option_grid.addWidget(self.right_plot_box, 3, 1)
+        self.option_grid.addWidget(self.left_plot_box_label, 3, 0)
+        self.option_grid.addWidget(self.left_plot_box, 3, 1)
+        self.option_grid.addWidget(self.right_plot_box_label, 4, 0)
+        self.option_grid.addWidget(self.right_plot_box, 4, 1)
 
         self.time_control = TimeControlWidget(self)
         self.panel_grid.addWidget(self.time_control, 3, 0)
@@ -329,7 +379,17 @@ class MainWidgetWindow(QWidget):
         self.show()
 
     def new_flight(self):
+        info = copy.deepcopy(self.conf.all())
+        info['type'] = 'radio'
+        self.reader(info, self.update)
         self.conf['dm'].new_save()
+
+    def load_flight(self):
+        pass
+
+    def open_configuration(self):
+        self.conf_win=ConfiguratorWindow(self.conf)
+        self.conf_win.show()
 
     def change_plots(self):
 
@@ -352,24 +412,36 @@ class MainWidgetWindow(QWidget):
         except Exception as e:
             print(e)
     def update(self, datag):
-        #print('xd')
+        print('xd')
         posX=None
         posY=None
         rssi=None
-        data=copy.deepcopy(datag)
+
+
+        data=copy.deepcopy(datag)#copy data
         #print(data)
         self.dm.add(data)
-        for d in data:
-            for l_item, l_value in self.labels.items():
-                if l_item == d['id']:
-                    l_value['value'].setText(d['value'])
+        elements=len(data)
+        if elements%2==0:
+            elements=elements/2
+        else:
+            elements=(elements+1)/2
+        for i in range(0,len(labels)):
+            if i<elements:
+                k=i
+                j=0
+            else:
+                k=i-elements
+                j=3
 
-            if d['id']=='positionX':
-                posX=d['value']
-            if d['id']=='positionY':
-                posY=d['value']
-            if d['id']=='rssi':
-                rssi=d['value']
+            self.labels[data[i]['id']]={'text':QLabel(data[i]['text']),
+            'value':QLabel('-')}
+            self.info_grid.addWidget(self.labels[data[i]['id']]['text'], k+1, j)
+            self.info_grid.addWidget(self.labels[data[i]['id']]['value'], k+1, j+1)
+        frame=QFrame()
+        frame.setFrameShape(QFrame.VLine)
+        self.info_grid.addWidget(frame, 1, 3, elements, 1)
+
         if posX!=None and posY!=None:
             self.map_add_point(posX, posY, rssi, str(data))
         #print(' try plot')
@@ -584,8 +656,9 @@ app.exec_()
 
 print('ok')
 '''
-
+'''
 app=QApplication(sys.argv)
-win=ConfiguratorWindow()
+win=ConfiguratorWindow({})
 win.show()
 app.exec_()
+'''
