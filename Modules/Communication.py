@@ -55,17 +55,15 @@ class DataReader:
 
     def keepReading(self, condition, interval=1, **kwargs):
         lastLine='RUN'
-        if not ('second_condition' in kwargs):
-            second_condition=True
         while(condition):
-            if(second_condition):
-                line=self.radio.readline()
-            #    line=b'80_50.4482155_21.7964096_100.0_28.02_1003.46_8.3_9.2\r\n'
-                if lastLine!=line and ('call' in kwargs) and line!=None:
-                    self._raw_data_sever(line)
-                    line = self.parser(line, self.structure)
-                    kwargs['call'](line)
-                lastLine=line
+            print('xda')
+            line=self.radio.readline()
+            # line=b'80_50.4482155_21.7964096_100.0_28.02_1003.46_8.3_9.2\r\n'
+            if lastLine!=line and ('call' in kwargs) and line!=None:
+                self._raw_data_sever(line)
+                line = self.parser(line, self.structure)
+                kwargs['call'](line)
+            lastLine=line
         time.sleep(1)
 
     def parser(self, data, structure):

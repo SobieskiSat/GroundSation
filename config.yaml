@@ -6,7 +6,7 @@ labels:
   num: 0
   text: 'Start elevation:'
   value: '1'
-- id: time
+- id: times
   num: 9
   text: 'Time:'
 - id: rssi
@@ -37,5 +37,5 @@ port: 'COM11'
 port_num: 3
 positionX: '1'
 positionY: '1'
-timeout: '11520'
+timeout: '1'
 version: '1.1'

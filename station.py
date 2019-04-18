@@ -23,6 +23,7 @@ class Configurator:
         self.save()
 
     def save(self):
+        print(self.data)
         with open(self.file, 'w') as outfile:
             yaml.dump(self.data, outfile, default_flow_style=False)
 
@@ -37,29 +38,25 @@ class Configurator:
         self.save()
 
     def all(self):
-        return self.data
+        return copy.deepcopy(self.data)
 
     def __str__(self):
         return str(self.data)
 
-def new_reader(info, call):
-    if info['type'] == 'radio':
+def new_reader(conf, obj, call):
+    if conf['type'] == 'radio':
         radio={
-        'port':info['port'],
-        'baudrate':info['baudrate'],
-        'timeout':info['timeout']
+        'port':conf['port'],
+        'baudrate':conf['baudrate'],
+        'timeout':conf['timeout']
         }
-        dr=DataReader(info['labels'], radio, event_manager = info['em'], rds=info['rds'])
+        dr=DataReader(conf['labels'], radio, event_manager = obj['em'], rds=obj['rds'])
         reader = threading.Thread(target=dr.keepReading, args=(True, ), kwargs={'call':call,})
+        reader.start()
 
 conf = Configurator('config.yaml')
 dm=DataManager(None)
-em=dm.em
-rds=dm.ds
-print(conf)
-conf['dm'] = dm
-conf['rds'] = rds
-conf['em'] = em
+obj={'dm':dm, 'em':dm.em, 'rds':dm.ds, 'reader':new_reader}
 app = QApplication(sys.argv)
-win = MainWidgetWindow(conf, new_reader)
+win = MainWidgetWindow(conf, obj)
 app.exec_()

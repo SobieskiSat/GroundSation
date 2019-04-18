@@ -234,17 +234,18 @@ class ConfigureConnectionWindow(QWidget):
 
 
 class MainWidgetWindow(QWidget):
-    def __init__(self, conf, reader):
+    def __init__(self, conf, obj):
         super().__init__()
-        self.reader = reader
-        self.dm=DataManager(1000)
-        self.initUI(conf)
+        self.reader = obj['reader']
+        self.conf = conf
+        self.obj = obj
+        self.dm=DataManager(5000)
+        self.initUI()
 
-    def initUI(self, conf):
+    def initUI(self):
         self.labels={}
-        self.conf=conf
         #### Do wyrzucenia
-        labels=conf['labels']
+        labels=self.conf['labels']
         #labels[0].update({'value': conf.get("elevation") }) #dodawanie value do "elevation"
         items=['time/rssi','time/positionX','time/positionY','time/temperature','time/pressure','time/altitude','time/pm25','time/pm10']
 
@@ -381,8 +382,8 @@ class MainWidgetWindow(QWidget):
     def new_flight(self):
         info = copy.deepcopy(self.conf.all())
         info['type'] = 'radio'
-        self.reader(info, self.update)
-        self.conf['dm'].new_save()
+        self.reader(info, self.obj, self.update)
+        self.obj['dm'].new_save()
 
     def load_flight(self):
         pass
