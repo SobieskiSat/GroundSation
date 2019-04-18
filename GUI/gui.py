@@ -5,7 +5,8 @@ import os
 from PyQt5 import QtWebEngineWidgets, QtCore
 from PyQt5.QtWidgets import (QWidget, QPushButton, QLineEdit, QFrame,
 QDialog, QApplication, QComboBox, QLabel, QCheckBox, QGridLayout, QFileDialog,
-QHBoxLayout, QVBoxLayout, QSplitter, QRadioButton, QButtonGroup, QTabWidget, QTableWidget,QTableWidgetItem)
+QHBoxLayout, QVBoxLayout, QSplitter, QRadioButton, QButtonGroup, QTabWidget,
+ QTableWidget, QTableWidgetItem, QAbstractScrollArea, QHeaderView)
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -20,7 +21,7 @@ class ConfiguratorWindow(QWidget):
         self.structure={
         'baudrate':self.r_baudrate_edit,
         'port':self.r_port_edit,
-        'timeout':self.r_baudrate_edit
+        'timeout':self.r_timeout_edit
         }
 
     def initUI(self):
@@ -31,6 +32,7 @@ class ConfiguratorWindow(QWidget):
         self.parser_tab = QWidget()
         self.tabs.addTab(self.radio_tab, 'Radio')
         self.tabs.addTab(self.parser_tab, 'Parser')
+        self.setFixedSize(600, 400)
 
         #### Radio tab
 
@@ -61,6 +63,10 @@ class ConfiguratorWindow(QWidget):
 
         self.p_stu.setRowCount(5)
         self.p_stu.setColumnCount(3)
+        self.p_stu.setHorizontalHeaderLabels(['ID', 'Name', 'Number'])
+        self.p_stu.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+
+        self.parser_layout.addWidget(self.p_stu, 1, 0)
 
         self.parser_tab.setLayout(self.parser_layout)
 
@@ -76,6 +82,7 @@ class ConfiguratorWindow(QWidget):
 
 
         self.setLayout(self.main_grid)
+
         #print(isinstance(self.r_port_edit, QLineEdit)) sprawdzanie typu
 
     def save(self):
@@ -92,6 +99,7 @@ class ConfiguratorWindow(QWidget):
         self.conf.update(new)
 
     def load(self):
+        data = self.conf.all()
         for k,v in self.structure.items():
             if k in data:
                 try:
@@ -103,8 +111,22 @@ class ConfiguratorWindow(QWidget):
                         v.setCurrentText(str(data[k]))#może nie działać
                 except Exception as e:
                     print(e)
+        self.load_structure()
+
+    def load_structure(self):
+        labels =  self.conf.all()['labels']
+        self.p_stu.setRowCount(len(labels))
+        counter=0
+        for i in labels:
+            self.p_stu.setItem(counter, 0, QTableWidgetItem(i['id']))
+            self.p_stu.setItem(counter, 1, QTableWidgetItem(i['text']))
+            self.p_stu.setItem(counter, 2, QTableWidgetItem(str(i['num'])))
+            counter+=1
 
 
+    def show(self):
+        self.load()
+        super().show()
 
 
 
@@ -404,6 +426,10 @@ class MainWidgetWindow(QWidget):
 
     def change_prediction_state(self):
         self.conf['prediction'] = not self.conf['prediction']
+        if self.conf['prediction']:
+            self.prediction_button.setStyleSheet("background-color: green")
+        else:
+            self.prediction_button.setStyleSheet("background-color: red")
 
     def open_configuration(self):
         self.conf_win=ConfiguratorWindow(self.conf)
