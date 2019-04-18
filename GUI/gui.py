@@ -5,7 +5,7 @@ import os
 from PyQt5 import QtWebEngineWidgets, QtCore
 from PyQt5.QtWidgets import (QWidget, QPushButton, QLineEdit, QFrame,
 QDialog, QApplication, QComboBox, QLabel, QCheckBox, QGridLayout, QFileDialog,
-QHBoxLayout, QVBoxLayout, QSplitter, QRadioButton, QButtonGroup, QTabWidget)
+QHBoxLayout, QVBoxLayout, QSplitter, QRadioButton, QButtonGroup, QTabWidget, QTableWidget,QTableWidgetItem)
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -55,6 +55,15 @@ class ConfiguratorWindow(QWidget):
 
         self.radio_tab.setLayout(self.radio_layout)
 
+        ### Parser tab
+        self.parser_layout = QGridLayout()
+        self.p_stu = QTableWidget()
+
+        self.p_stu.setRowCount(5)
+        self.p_stu.setColumnCount(3)
+
+        self.parser_tab.setLayout(self.parser_layout)
+
         self.main_grid.addWidget(self.tabs, 0, 0)
 
         self.bottom_grid = QGridLayout()
@@ -63,6 +72,7 @@ class ConfiguratorWindow(QWidget):
 
         self.bottom_grid.addWidget(self.save_button, 0, 3)
         self.main_grid.addLayout(self.bottom_grid, 1, 0)
+
 
 
         self.setLayout(self.main_grid)
@@ -341,6 +351,10 @@ class MainWidgetWindow(QWidget):
         self.option_grid.addWidget(self.load_button, 2, 0)
         self.option_grid.addWidget(self.configuration_button, 2, 1)
 
+        self.prediction_button=QPushButton('Prediction', self)
+        self.prediction_button.clicked.connect(self.change_prediction_state)
+        self.option_grid.addWidget(self.prediction_button, 3, 1)
+
         self.left_plot_box = QComboBox(self)
         self.left_plot_box.addItems(items) #dodawanie listy wykresów
 
@@ -355,10 +369,10 @@ class MainWidgetWindow(QWidget):
         self.left_plot_box_label = QLabel('Left Plot')
         self.right_plot_box_label = QLabel('Right Plot')
 
-        self.option_grid.addWidget(self.left_plot_box_label, 3, 0)
-        self.option_grid.addWidget(self.left_plot_box, 3, 1)
-        self.option_grid.addWidget(self.right_plot_box_label, 4, 0)
-        self.option_grid.addWidget(self.right_plot_box, 4, 1)
+        self.option_grid.addWidget(self.left_plot_box_label, 4, 0)
+        self.option_grid.addWidget(self.left_plot_box, 4, 1)
+        self.option_grid.addWidget(self.right_plot_box_label, 5, 0)
+        self.option_grid.addWidget(self.right_plot_box, 5, 1)
 
         self.time_control = TimeControlWidget(self)
         self.panel_grid.addWidget(self.time_control, 3, 0)
@@ -387,6 +401,9 @@ class MainWidgetWindow(QWidget):
 
     def load_flight(self):
         pass
+
+    def change_prediction_state(self):
+        self.conf['prediction'] = not self.conf['prediction']
 
     def open_configuration(self):
         self.conf_win=ConfiguratorWindow(self.conf)
@@ -451,19 +468,20 @@ class MainWidgetWindow(QWidget):
             self.right_plot.update()
         except Exception as e:
             print('Graf nie działa!!!'+str(e))
-        try:
-            predicts_num=50
-            if(len(self.dm.get_by_id('positionX', predicts_num))==predicts_num):
-                pred=self.conf['predictor'].predict([
-                    self.dm.get_by_id('positionX', predicts_num),
-                    self.dm.get_by_id('positionY', predicts_num),
-                    self.dm.get_by_id('altitude', predicts_num)], float(self.conf.get("elevation"))) #nowe zmiana stałej 202 na stałą ustalaną podczas startu programu w gui.py
-                try:
-                    self.webView.page().runJavaScript('drawPrediction('+str(pred['x'])+', '+str(pred['y'])+', '+str(pred['r'])+')')
-                except Exception as e:
-                    print(e)
-        except Exception as e:
-            print(e)
+        if self.conf['prediction']==True:
+            try:
+                predicts_num=50
+                if(len(self.dm.get_by_id('positionX', predicts_num))==predicts_num):
+                    pred=self.conf['predictor'].predict([
+                        self.dm.get_by_id('positionX', predicts_num),
+                        self.dm.get_by_id('positionY', predicts_num),
+                        self.dm.get_by_id('altitude', predicts_num)], float(self.conf.get("elevation"))) #nowe zmiana stałej 202 na stałą ustalaną podczas startu programu w gui.py
+                    try:
+                        self.webView.page().runJavaScript('drawPrediction('+str(pred['x'])+', '+str(pred['y'])+', '+str(pred['r'])+')')
+                    except Exception as e:
+                        print(e)
+            except Exception as e:
+                print(e)
 
     def map_functions(self):
         #self.webView.page().runJavaScript('addPoint(50.05925, 19.92293, 13, "aaa")')

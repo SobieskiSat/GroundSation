@@ -23,7 +23,7 @@ class Configurator:
         self.save()
 
     def save(self):
-        print(self.data)
+        #print(self.data)
         with open(self.file, 'w') as outfile:
             yaml.dump(self.data, outfile, default_flow_style=False)
 
