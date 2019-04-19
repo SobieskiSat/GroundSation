@@ -68,83 +68,6 @@ class DataCreator:
         return self.data
 
 
-
-
-class DataReader:
-    def __init__(self, structure, radio, **kwargs):
-        self.kwargs = kwargs
-        self.dataCounter=0
-        self.structure = structure #structure of data received from satellite
-        for s in self.structure: #check if every stucture has all attributes
-            for p in ['id', 'text', 'num']:
-                if not(p in s):
-                    raise Exception('Not found "'+p+'" in "'+str(s)+'" structures')
-
-        for p in ['baudrate', 'port', 'timeout']:#check if radio has all attributes
-            if not( p in radio):
-                raise Exception('Not found "'+p+'" in "'+str(radio)+'" radio')
-        try: #open _log_manager
-            self._log_manager('open_DataReader:open_log_manager', structure=structure, radio=radio, kwargs=kwargs)
-        except Exception:
-            raise Exception('Failed opening _log_manager in DataReader')
-        try: #open radio
-            self._log_manager('open_radio', radio=radio)
-            self.radio = Radio(radio['baudrate'], radio['port'], radio['timeout'], event_manager = self._log_manager)
-        except Exception:
-            #self._log_manager('open_radio:exception', radio=radio)
-            pass
-
-        self._log_manager('open_DataReader:done')# log everything is OK
-
-    def _log_manager(self, action, **kwargs):
-        if('event_manager' in self.kwargs):
-            self.kwargs['event_manager'](self, action, kwargs=kwargs)
-
-    def _raw_data_sever(self, data):
-        if('rds' in self.kwargs):
-            self.kwargs['rds'](data)
-
-    def keepReading(self, condition, interval=1, **kwargs):
-        lastLine='RUN'
-        while(condition):
-            line=self.radio.readline()
-            # line=b'80_50.4482155_21.7964096_100.0_28.02_1003.46_8.3_9.2\r\n'
-            if lastLine!=line and ('call' in kwargs) and line!=None:
-                self._raw_data_sever(line)
-                line = self.parser(line, self.structure)
-                kwargs['call'](line)
-            lastLine=line
-        time.sleep(0.2)
-
-    def parser(self, data, structure):
-        st = self.structure
-        data=str(data[:-2])[2:-1]
-        #print(len(st)==data.count('_'))
-        if(len(st)==data.count('_')+3): #check if data is OK, THERE MUST BE 2
-            data = data.split("_")
-            data.append(str(self.dataCounter))
-            for s in st:
-                if s['num']!=0:
-                    s['value']=data[s['num']-1]#set value of every structure (plus 1 => 0 is ignored by parser )
-
-        self.dataCounter+=1
-        #print(st)
-        return st
-
-        #checksum --- to be added
-    '''
-    def __del__(self):
-        with open('log.yml', 'w') as outfile:
-            yaml.dump(self., outfile, default_flow_style=False)
-    '''
-
-
-
-
-
-
-
-
 class Radio:
     def __init__(self, baudrate = 115200, port='COM9', timeout=1, **kwargs):
         self.kwargs = kwargs
@@ -171,15 +94,6 @@ class Radio:
         if('event_manager' in self.kwargs):
             self.kwargs['event_manager'](action, kwargs=kwargs)
 
-    def keepReading(self, condition, interval=1, **kwargs):
-        self.lines=[]
-        self.lines.append('Opening:')
-        while(condition):
-            time.sleep(interval)
-            if self.lines[-1]!=line and 'call' in kwargs and line!=None:
-                line = self.parser(line)
-                kwargs['call'](line)
-            self.lines.append(line)
 
     def _set_dict_argument(self, list, id_key, id_value, value_key, value):
         for d in list:
