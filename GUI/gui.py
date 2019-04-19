@@ -98,7 +98,7 @@ class ConfiguratorWindow(QWidget):
             ### Dodać Obsługę Pliki
 
         self.conf.update(new)
-
+        self.close()
     def load(self):
         data = self.conf.all()
         for k,v in self.structure.items():
@@ -353,8 +353,8 @@ class MainWidgetWindow(QWidget):
         #self.webView.page.run
         #page().runJavaScript("[map.getBounds().getSouthWest().lat, map.getBounds().getSouthWest().lng, map.getBounds().getNorthEast().lat, map.getBounds().getNorthEast().lng]")
         self.top_grid.addWidget(self.webView, 1,1)
-        self.left_plot=self.draw_plot('time', 'altitude', self.dm)
-        self.right_plot=self.draw_plot('time', 'pressure', self.dm)
+        self.left_plot=self.draw_plot('time', 'rssi', self.dm)
+        self.right_plot=self.draw_plot('time', 'rssi', self.dm)
         self.bottom_grid.addWidget(self.left_plot.get_widget(), 1,0)
         self.bottom_grid.addWidget(self.right_plot.get_widget(), 1,1)
         self.webView.loadFinished.connect(self.webView_loaded_event)
@@ -413,7 +413,7 @@ class MainWidgetWindow(QWidget):
         self.input_grid=QGridLayout()
 
         self.qtimer = QtCore.QTimer()
-        self.qtimer.setInterval(100)
+        self.qtimer.setInterval(200)   #IMPORTANT Update interval
         self.qtimer.timeout.connect(self.update)
 
 

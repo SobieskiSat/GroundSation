@@ -1,4 +1,4 @@
-baudrate: '11520'
+baudrate: '115200'
 elevation: '1'
 file: ''
 labels:
