@@ -2,6 +2,7 @@ import sys
 import yaml
 import copy
 import os
+import numpy as np
 from PyQt5 import QtWebEngineWidgets, QtCore
 from PyQt5.QtWidgets import (QWidget, QPushButton, QLineEdit, QFrame,
 QDialog, QApplication, QComboBox, QLabel, QCheckBox, QGridLayout, QFileDialog,
@@ -66,6 +67,11 @@ class ConfiguratorWindow(QWidget):
         self.p_stu.setHorizontalHeaderLabels(['ID', 'Name', 'Number'])
         self.p_stu.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
 
+        self.p_add_button = QPushButton('Add')
+        self.p_add_button.clicked.connect(self.p_add)
+        #self.p_add
+
+
         self.parser_layout.addWidget(self.p_stu, 1, 0)
 
         self.parser_tab.setLayout(self.parser_layout)
@@ -85,6 +91,8 @@ class ConfiguratorWindow(QWidget):
         self.setWindowTitle('Configuration')
 
         #print(isinstance(self.r_port_edit, QLineEdit)) sprawdzanie typu
+    def p_add(self):
+        pass
 
     def save(self):
         new={}
@@ -574,6 +582,8 @@ class PlotG:
         self.fig = plt.Figure()#main figure
         self.canvas=FigureCanvas(self.fig)
         self.sp=self.fig.add_subplot(1,1,1)
+        self.avsp =self.fig.add_subplot(1,1,1)
+
         self.length=100
 
         self.lx=lx#list of x param
@@ -597,6 +607,7 @@ class PlotG:
         tab2=self.dm.get_by_id(self.lx, self.length)
         self.sp.plot(tab2, tab)
         #self.sp.plot(self.make_data(self.ly, data), self.make_data(self.lx, data))
+        self.avsp.plot(tab2, [np.mean(tab) for i in tab])
         self.canvas.draw()
 
         #print('xdddd')
