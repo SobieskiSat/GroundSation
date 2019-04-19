@@ -19,20 +19,23 @@ class DataCreator:
         'timeout':self.conf['timeout']
         }
         try:
-            print('aaasd')
+            #print('aaasd')
             self.radio = Radio(self.conf['baudrate'], self.conf['port'], self.conf['timeout'])
         except Exception as e:
             print(e)
 
     def run_radio(self):
-        try:
-            print('xxa')
-            line=self.radio.readline()
-            #self._raw_data_sever(line)
-            line = self.parser(line)
-            self.call(line)
-        except Exception as e:
-            print(e)
+        if hasattr(self, 'radio'):
+            try:
+                #print('xxa')
+                line=self.radio.readline()
+                #self._raw_data_sever(line)
+                if line!=None:
+                    line = self.parser(line)
+                    self.call(line)
+            except Exception as e:
+                print(e)
+
 
     def loop(self):
         while(True):
@@ -46,7 +49,7 @@ class DataCreator:
     def parser(self, data):
         st = copy.deepcopy(self.conf['labels'])
         data=str(data[:-2])[2:-1]
-        print(len(st)==data.count('_'))
+        #print(len(st)==data.count('_'))
         if(len(st)==data.count('_')+3): #check if data is OK, THERE MUST BE 3
             data = data.split("_")
             data.append(str(self._dataCounter))
@@ -55,16 +58,13 @@ class DataCreator:
                     s['value']=data[s['num']-1]#set value of every structure (plus 1 => 0 is ignored by parser )
 
         self._dataCounter+=1
-        #print(st)
         return st
 
 
     def call(self, data):
-        print(data)
         self.data = data
 
     def get(self):
-        print('ger')
         return self.data
 
 
@@ -119,7 +119,7 @@ class DataReader:
     def parser(self, data, structure):
         st = self.structure
         data=str(data[:-2])[2:-1]
-        print(len(st)==data.count('_'))
+        #print(len(st)==data.count('_'))
         if(len(st)==data.count('_')+3): #check if data is OK, THERE MUST BE 2
             data = data.split("_")
             data.append(str(self.dataCounter))

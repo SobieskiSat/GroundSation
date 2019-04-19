@@ -310,7 +310,7 @@ class MainWidgetWindow(QWidget):
         self.panel_grid.addLayout(self.info_grid, 1, 0)
         self.panel_grid.addLayout(self.option_grid, 2, 0)
         self.info_widget.setLayout(self.panel_grid)
-
+        self.info_grid_structure = {}
         self.top_splitter=QSplitter(QtCore.Qt.Horizontal)
         self.top_splitter.addWidget(self.info_widget)
 
@@ -413,7 +413,7 @@ class MainWidgetWindow(QWidget):
         self.input_grid=QGridLayout()
 
         self.qtimer = QtCore.QTimer()
-        self.qtimer.setInterval(5)
+        self.qtimer.setInterval(100)
         self.qtimer.timeout.connect(self.update)
 
 
@@ -425,7 +425,6 @@ class MainWidgetWindow(QWidget):
         info = copy.deepcopy(self.conf.all())
         info['type'] = 'radio'
         #self.reader(info, self.obj, self.update)
-        print(self.obj)
         self.obj['type']='Radio'
         #self.obj['dm'].new_save()
         self.obj['dc'].new_radio()
@@ -465,6 +464,7 @@ class MainWidgetWindow(QWidget):
             self.webView.page().runJavaScript('centerMap('+posX+', '+posY+')')
         except Exception as e:
             print(e)
+
     def update(self):
         posX=None
         posY=None
@@ -473,22 +473,33 @@ class MainWidgetWindow(QWidget):
         data=copy.deepcopy(data)#copy data
         self.dm.add(data)
         elements=len(data)
-
-        if elements%2==0:
-            elements=elements/2
-        else:
-            elements=(elements+1)/2
-        for i in range(0,len(data)):
-            if i<elements:
-                k=i
-                j=0
+        #print(data)
+        for d in data:
+            if d['id']  in self.info_grid_structure.keys():
+                self.info_grid_structure[ d['id']].setText(d['value'])
             else:
-                k=i-elements
-                j=3
-            print(data[i])
-
-            self.info_grid.addWidget(QLabel(data[i]['text']), k, j)
-            self.info_grid.addWidget(QLabel(data[i]['value']), k, j+1)
+                self.info_grid_structure={}
+        #print(self.info_grid_structure)
+        if self.info_grid_structure=={}:
+            while self.info_grid.count():
+                child = self.info_grid.takeAt(0)
+                if child.widget():
+                    child.widget().deleteLater()
+            if elements%2==0:
+                elements=elements/2
+            else:
+                elements=(elements+1)/2
+            for i in range(0,len(data)):
+                if i<elements:
+                    k=i
+                    j=0
+                else:
+                    k=i-elements
+                    j=3
+                #print(data[i])
+                self.info_grid_structure[data[i]['id']] = QLabel(data[i]['value'])
+                self.info_grid.addWidget(QLabel(data[i]['text']), k, j)
+                self.info_grid.addWidget(self.info_grid_structure[data[i]['id']], k, j+1)
 
 
         #frame=QFrame()
