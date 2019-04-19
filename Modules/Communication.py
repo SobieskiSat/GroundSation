@@ -4,19 +4,70 @@ import time
 import yaml
 import copy
 
-class DataCreator:
-    def __init__(self, **kwargs):
-        self.kwargs=kwargs
-        self.structure = kwargs['structure']
 
-    def use_radio(self):
+class DataCreator:
+    def __init__(self, conf, obj):
+        self.conf = conf
+        self.obj = obj
+        self.data=[]
+
+    def new_radio(self):
+        self._dataCounter=0
+        self.radio_conf={
+        'port':self.conf['port'],
+        'baudrate':self.conf['baudrate'],
+        'timeout':self.conf['timeout']
+        }
         try:
-            self.radio = DataReader(self.structure, self.kwargs['radio'], call=self.outputter, **self.kwargs['kwargs'])
+            print('aaasd')
+            self.radio = Radio(self.conf['baudrate'], self.conf['port'], self.conf['timeout'])
         except Exception as e:
             print(e)
 
-    def outputter(self, data):
-        pass
+    def run_radio(self):
+        try:
+            print('xxa')
+            line=self.radio.readline()
+            #self._raw_data_sever(line)
+            line = self.parser(line)
+            self.call(line)
+        except Exception as e:
+            print(e)
+
+    def loop(self):
+        while(True):
+            while(self.obj['type']=='Radio'):
+                self.run_radio()
+
+    def _raw_data_sever(self, data):
+        if('rds' in self.kwargs):
+            self.kwargs['rds'](data)
+
+    def parser(self, data):
+        st = copy.deepcopy(self.conf['labels'])
+        data=str(data[:-2])[2:-1]
+        print(len(st)==data.count('_'))
+        if(len(st)==data.count('_')+3): #check if data is OK, THERE MUST BE 3
+            data = data.split("_")
+            data.append(str(self._dataCounter))
+            for s in st:
+                if s['num']!=0:
+                    s['value']=data[s['num']-1]#set value of every structure (plus 1 => 0 is ignored by parser )
+
+        self._dataCounter+=1
+        #print(st)
+        return st
+
+
+    def call(self, data):
+        print(data)
+        self.data = data
+
+    def get(self):
+        print('ger')
+        return self.data
+
+
 
 
 class DataReader:
@@ -56,7 +107,6 @@ class DataReader:
     def keepReading(self, condition, interval=1, **kwargs):
         lastLine='RUN'
         while(condition):
-            print('xda')
             line=self.radio.readline()
             # line=b'80_50.4482155_21.7964096_100.0_28.02_1003.46_8.3_9.2\r\n'
             if lastLine!=line and ('call' in kwargs) and line!=None:
@@ -64,12 +114,12 @@ class DataReader:
                 line = self.parser(line, self.structure)
                 kwargs['call'](line)
             lastLine=line
-        time.sleep(1)
+        time.sleep(0.2)
 
     def parser(self, data, structure):
         st = self.structure
         data=str(data[:-2])[2:-1]
-        #print(data)
+        print(len(st)==data.count('_'))
         if(len(st)==data.count('_')+3): #check if data is OK, THERE MUST BE 2
             data = data.split("_")
             data.append(str(self.dataCounter))

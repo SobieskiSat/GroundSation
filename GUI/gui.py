@@ -82,6 +82,7 @@ class ConfiguratorWindow(QWidget):
 
 
         self.setLayout(self.main_grid)
+        self.setWindowTitle('Configuration')
 
         #print(isinstance(self.r_port_edit, QLineEdit)) sprawdzanie typu
 
@@ -268,7 +269,7 @@ class ConfigureConnectionWindow(QWidget):
 class MainWidgetWindow(QWidget):
     def __init__(self, conf, obj):
         super().__init__()
-        self.reader = obj['reader']
+        #self.reader = obj['reader']
         self.conf = conf
         self.obj = obj
         self.dm=DataManager(5000)
@@ -411,6 +412,11 @@ class MainWidgetWindow(QWidget):
         self.top_splitter.splitterMoved.connect(self.resize_map)
         self.input_grid=QGridLayout()
 
+        self.qtimer = QtCore.QTimer()
+        self.qtimer.setInterval(5)
+        self.qtimer.timeout.connect(self.update)
+
+
         self.setGeometry(300, 300, 590, 350)
         self.setWindowTitle('SobieskiSat')
         self.show()
@@ -418,8 +424,12 @@ class MainWidgetWindow(QWidget):
     def new_flight(self):
         info = copy.deepcopy(self.conf.all())
         info['type'] = 'radio'
-        self.reader(info, self.obj, self.update)
-        self.obj['dm'].new_save()
+        #self.reader(info, self.obj, self.update)
+        print(self.obj)
+        self.obj['type']='Radio'
+        #self.obj['dm'].new_save()
+        self.obj['dc'].new_radio()
+        self.qtimer.start()
 
     def load_flight(self):
         pass
@@ -455,36 +465,35 @@ class MainWidgetWindow(QWidget):
             self.webView.page().runJavaScript('centerMap('+posX+', '+posY+')')
         except Exception as e:
             print(e)
-    def update(self, datag):
-        print('xd')
+    def update(self):
         posX=None
         posY=None
         rssi=None
-
-
-        data=copy.deepcopy(datag)#copy data
-        #print(data)
+        data = self.obj['dc'].get()
+        data=copy.deepcopy(data)#copy data
         self.dm.add(data)
         elements=len(data)
+
         if elements%2==0:
             elements=elements/2
         else:
             elements=(elements+1)/2
-        for i in range(0,len(labels)):
+        for i in range(0,len(data)):
             if i<elements:
                 k=i
                 j=0
             else:
                 k=i-elements
                 j=3
+            print(data[i])
 
-            self.labels[data[i]['id']]={'text':QLabel(data[i]['text']),
-            'value':QLabel('-')}
-            self.info_grid.addWidget(self.labels[data[i]['id']]['text'], k+1, j)
-            self.info_grid.addWidget(self.labels[data[i]['id']]['value'], k+1, j+1)
-        frame=QFrame()
-        frame.setFrameShape(QFrame.VLine)
-        self.info_grid.addWidget(frame, 1, 3, elements, 1)
+            self.info_grid.addWidget(QLabel(data[i]['text']), k, j)
+            self.info_grid.addWidget(QLabel(data[i]['value']), k, j+1)
+
+
+        #frame=QFrame()
+        #frame.setFrameShape(QFrame.VLine)
+        #self.info_grid.addWidget(frame, 1, 3, elements, 1)
 
         if posX!=None and posY!=None:
             self.map_add_point(posX, posY, rssi, str(data))
@@ -494,6 +503,7 @@ class MainWidgetWindow(QWidget):
             self.right_plot.update()
         except Exception as e:
             print('Graf nie działa!!!'+str(e))
+        '''
         if self.conf['prediction']==True:
             try:
                 predicts_num=50
@@ -508,7 +518,8 @@ class MainWidgetWindow(QWidget):
                         print(e)
             except Exception as e:
                 print(e)
-
+        '''
+        super().update()
     def map_functions(self):
         #self.webView.page().runJavaScript('addPoint(50.05925, 19.92293, 13, "aaa")')
         self.webView.page().runJavaScript('alert("aa")')

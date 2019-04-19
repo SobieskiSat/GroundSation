@@ -56,7 +56,13 @@ def new_reader(conf, obj, call):
 
 conf = Configurator('config.yaml')
 dm=DataManager(None)
-obj={'dm':dm, 'em':dm.em, 'rds':dm.ds, 'reader':new_reader}
+obj={'dm':dm, 'em':dm.em, 'rds':dm.ds, 'reader':new_reader, 'type':None}
+dc = DataCreator(conf, obj)
+obj['dc']=dc
+
+reader = threading.Thread(target=dc.loop)
+reader.start()
+
 app = QApplication(sys.argv)
 win = MainWidgetWindow(conf, obj)
 app.exec_()
