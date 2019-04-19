@@ -473,10 +473,12 @@ class MainWidgetWindow(QWidget):
         data=copy.deepcopy(data)#copy data
         self.dm.add(data)
         elements=len(data)
+        self.parsed_data={}
         #print(data)
         for d in data:
             if d['id']  in self.info_grid_structure.keys():
                 self.info_grid_structure[ d['id']].setText(d['value'])
+                self.parsed_data[d['id']] = d['value']
             else:
                 self.info_grid_structure={}
         #print(self.info_grid_structure)
@@ -505,10 +507,13 @@ class MainWidgetWindow(QWidget):
         #frame=QFrame()
         #frame.setFrameShape(QFrame.VLine)
         #self.info_grid.addWidget(frame, 1, 3, elements, 1)
-
-        if posX!=None and posY!=None:
-            self.map_add_point(posX, posY, rssi, str(data))
-        #print(' try plot')
+        try:
+            self.map_add_point(self.parsed_data['positionX'],
+            self.parsed_data['positionY'],
+            self.parsed_data['rssi'], str(self.parsed_data))
+            #print(' try plot')
+        except Exception as e:
+            print(e)
         try:
             self.left_plot.update()
             self.right_plot.update()
