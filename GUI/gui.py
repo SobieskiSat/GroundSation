@@ -42,6 +42,7 @@ class ConfiguratorWindow(QWidget):
         self.r_autoport_label=QLabel('Automatic Port Finder:')
         self.r_baudrate_label=QLabel('Baudrate:')
         self.r_timeout_label=QLabel('Timeout:')
+
         self.r_baudrate_edit=QLineEdit()
         self.r_port_edit=QLineEdit()
         self.r_autoport_edit=QCheckBox()
@@ -608,6 +609,7 @@ class PlotG:
         self.sp.clear()
         tab=self.dm.get_by_id(self.ly, self.length)
         tab2=self.dm.get_by_id(self.lx, self.length)
+        self.sp.scatter(tab2, tab)
         self.sp.plot(tab2, tab)
         #self.sp.plot(self.make_data(self.ly, data), self.make_data(self.lx, data))
         self.avsp.plot(tab2, [np.mean(tab) for i in tab])
