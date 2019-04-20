@@ -59,6 +59,7 @@ dm=DataManager(None)
 obj={'dm':dm, 'em':dm.em, 'rds':dm.ds, 'reader':new_reader, 'type':None}
 dc = DataCreator(conf, obj)
 obj['dc']=dc
+obj['predictor'] = Predictor()
 
 reader = threading.Thread(target=dc.loop)
 reader.start()

@@ -385,6 +385,7 @@ class MainWidgetWindow(QWidget):
         self.prediction_button=QPushButton('Prediction', self)
         self.prediction_button.clicked.connect(self.change_prediction_state)
         self.option_grid.addWidget(self.prediction_button, 3, 1)
+        self.change_prediction_state()
 
         self.left_plot_box = QComboBox(self)
         self.left_plot_box.addItems(items) #dodawanie listy wykresów
@@ -442,8 +443,10 @@ class MainWidgetWindow(QWidget):
         pass
 
     def change_prediction_state(self):
-        self.conf['prediction'] = not self.conf['prediction']
-        if self.conf['prediction']:
+        if 'prediction' not in self.obj:
+            self.obj['prediction'] = True
+        self.obj['prediction'] = not self.obj['prediction']
+        if self.obj['prediction']:
             self.prediction_button.setStyleSheet("background-color: green")
         else:
             self.prediction_button.setStyleSheet("background-color: red")
@@ -527,12 +530,12 @@ class MainWidgetWindow(QWidget):
             self.right_plot.update()
         except Exception as e:
             print('Graf nie działa!!!'+str(e))
-        '''
-        if self.conf['prediction']==True:
+
+        if self.obj['prediction']==True:
             try:
                 predicts_num=50
                 if(len(self.dm.get_by_id('positionX', predicts_num))==predicts_num):
-                    pred=self.conf['predictor'].predict([
+                    pred=self.obj['predictor'].predict([
                         self.dm.get_by_id('positionX', predicts_num),
                         self.dm.get_by_id('positionY', predicts_num),
                         self.dm.get_by_id('altitude', predicts_num)], float(self.conf.get("elevation"))) #nowe zmiana stałej 202 na stałą ustalaną podczas startu programu w gui.py
@@ -542,7 +545,7 @@ class MainWidgetWindow(QWidget):
                         print(e)
             except Exception as e:
                 print(e)
-        '''
+
         super().update()
     def map_functions(self):
         #self.webView.page().runJavaScript('addPoint(50.05925, 19.92293, 13, "aaa")')
