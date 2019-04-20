@@ -68,12 +68,18 @@ class ConfiguratorWindow(QWidget):
         self.p_stu.setHorizontalHeaderLabels(['ID', 'Name', 'Number'])
         self.p_stu.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
 
+        self.p_tab_control_grid = QGridLayout()
         self.p_add_button = QPushButton('Add')
         self.p_add_button.clicked.connect(self.p_add)
-        #self.p_add
+        self.p_tab_control_grid.addWidget(self.p_add_button, 0,0)
 
+        self.p_remove_button = QPushButton('Remove')
+        self.p_remove_button.clicked.connect(self.p_remove)
+        self.p_tab_control_grid.addWidget(self.p_remove_button, 0,1)
 
         self.parser_layout.addWidget(self.p_stu, 1, 0)
+        self.parser_layout.addLayout(self.p_tab_control_grid, 2, 0)
+
 
         self.parser_tab.setLayout(self.parser_layout)
 
@@ -93,7 +99,10 @@ class ConfiguratorWindow(QWidget):
 
         #print(isinstance(self.r_port_edit, QLineEdit)) sprawdzanie typu
     def p_add(self):
-        pass
+        self.p_stu.insertRow(self.p_stu.currentRow()+1)
+
+    def p_remove(self):
+        self.p_stu.removeRow(self.p_stu.currentRow())
 
     def save(self):
         new={}
@@ -105,9 +114,11 @@ class ConfiguratorWindow(QWidget):
             elif isinstance(v, QCheckBox):
                 new[k] = v.checkState()
             ### Dodać Obsługę Pliki
+        self.p_save_structure()
 
         self.conf.update(new)
         self.close()
+
     def load(self):
         data = self.conf.all()
         for k,v in self.structure.items():
@@ -132,6 +143,15 @@ class ConfiguratorWindow(QWidget):
             self.p_stu.setItem(counter, 1, QTableWidgetItem(i['text']))
             self.p_stu.setItem(counter, 2, QTableWidgetItem(str(i['num'])))
             counter+=1
+
+    def p_save_structure(self):
+        stru = []
+        for r in range(0, self.p_stu.rowCount()):
+            id =  self.p_stu.item(r, 0).text()
+            name =  self.p_stu.item(r, 1).text()
+            num =  self.p_stu.item(r, 2).text()
+            stru.append({'id':id, 'num':int(num), 'text':name})
+        self.conf['labels']=stru
 
 
     def show(self):
