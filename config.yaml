@@ -1,5 +1,5 @@
 baudrate: '11520'
-elevation: 1
+elevation: '1'
 file: ''
 labels:
 - id: time
@@ -29,16 +29,12 @@ labels:
 - id: pm10
   num: 8
   text: 'PM-10:'
-multi_prediction: !!python/object/apply:sip._unpickle_enum
-- PyQt5.QtCore
-- CheckState
-- 0
 port: COM11
 port_num: 3
 positionX: '1'
 positionY: '1'
 prediction: true
 pressure: '1013'
-save_path: D:\Projekty\Programowanide\CanSat\Logi
+save_path: D:/inne
 timeout: '1'
 version: '1.1'

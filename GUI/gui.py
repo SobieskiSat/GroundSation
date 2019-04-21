@@ -24,9 +24,8 @@ class ConfiguratorWindow(QWidget):
         'baudrate':self.r_baudrate_edit,
         'port':self.r_port_edit,
         'timeout':self.r_timeout_edit,
-        'elevation':self.g_elevation_label,
-        'pressure':self.g_pressure_label,
-        'multi_prediction':self.g_multi_prediction_edit
+        'elevation':self.g_elevation_edit,
+        'pressure':self.g_pressure_edit
 
         }
 
@@ -104,7 +103,8 @@ class ConfiguratorWindow(QWidget):
         self.g_elevation_edit=QLineEdit()
         self.g_pressure_edit=QLineEdit()
         self.g_multi_prediction_edit=QCheckBox()
-        self.g_save_path_label=QPushButton()
+        self.g_save_path_edit=QPushButton('Wybierz')
+        self.g_save_path_edit.clicked.connect(self.r_file_dialog)
 
         self.general_layout.addWidget(self.g_elevation_label, 1, 0)
         self.general_layout.addWidget(self.g_elevation_edit, 1, 1)
@@ -113,8 +113,8 @@ class ConfiguratorWindow(QWidget):
         self.general_layout.addWidget(self.g_multi_prediction_label, 3, 0)
         self.general_layout.addWidget(self.g_multi_prediction_edit, 3, 1)
         self.general_layout.addWidget(self.g_save_path_label, 4, 0)
-        self.general_layout.addWidget(self.g_save_path_label, 4, 1)
-        self.general_layout.addWidget(self.g_save_path_label, 5, 0)
+        self.general_layout.addWidget(self.g_save_path_edit, 4, 1)
+        self.general_layout.addWidget(self.g_current_path_label, 5, 0)
         self.general_layout.addWidget(self.g_current_path__label_label, 5, 1)
 
         self.general_tab.setLayout(self.general_layout)
@@ -129,8 +129,6 @@ class ConfiguratorWindow(QWidget):
         self.bottom_grid.addWidget(self.save_button, 0, 3)
         self.main_grid.addLayout(self.bottom_grid, 1, 0)
 
-
-
         self.setLayout(self.main_grid)
         self.setWindowTitle('Configuration')
 
@@ -140,6 +138,12 @@ class ConfiguratorWindow(QWidget):
 
     def p_remove(self):
         self.p_stu.removeRow(self.p_stu.currentRow())
+
+    def r_file_dialog(self):
+        file_name = QFileDialog.getExistingDirectory(self, 'Select', '/home')
+        if file_name:
+            self.conf['save_path']=file_name
+
 
     def save(self):
         new={}
@@ -164,6 +168,7 @@ class ConfiguratorWindow(QWidget):
                 try:
                     if isinstance(v, QLineEdit):
                         v.setText(str(data[k]))
+                        print(k)
                     elif isinstance(v, QCheckBox):
                         v.setChecked(data[k])
                     elif isinstance(v, QComboBox):
