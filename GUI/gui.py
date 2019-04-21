@@ -23,7 +23,11 @@ class ConfiguratorWindow(QWidget):
         self.structure={
         'baudrate':self.r_baudrate_edit,
         'port':self.r_port_edit,
-        'timeout':self.r_timeout_edit
+        'timeout':self.r_timeout_edit,
+        'elevation':self.g_elevation_label,
+        'pressure':self.g_pressure_label,
+        'multi_prediction':self.g_multi_prediction_edit
+
         }
 
 
@@ -33,8 +37,10 @@ class ConfiguratorWindow(QWidget):
 
         self.radio_tab = QWidget()
         self.parser_tab = QWidget()
+        self.general_tab = QWidget()
         self.tabs.addTab(self.radio_tab, 'Radio')
         self.tabs.addTab(self.parser_tab, 'Parser')
+        self.tabs.addTab(self.general_tab, 'General')
         self.setFixedSize(600, 400)
 
         #### Radio tab
@@ -85,6 +91,34 @@ class ConfiguratorWindow(QWidget):
 
 
         self.parser_tab.setLayout(self.parser_layout)
+
+        ### General tab
+        self.general_layout = QGridLayout()
+        self.g_elevation_label=QLabel('Elevation:')
+        self.g_pressure_label=QLabel('Pressure:')
+        self.g_multi_prediction_label=QLabel('Multipoint Prediction:')
+        self.g_save_path_label=QLabel('Set Save Path:')
+        self.g_current_path_label=QLabel('Current Path:')
+        self.g_current_path__label_label=QLabel('-')
+
+        self.g_elevation_edit=QLineEdit()
+        self.g_pressure_edit=QLineEdit()
+        self.g_multi_prediction_edit=QCheckBox()
+        self.g_save_path_label=QPushButton()
+
+        self.general_layout.addWidget(self.g_elevation_label, 1, 0)
+        self.general_layout.addWidget(self.g_elevation_edit, 1, 1)
+        self.general_layout.addWidget(self.g_pressure_label, 2, 0)
+        self.general_layout.addWidget(self.g_pressure_edit, 2, 1)
+        self.general_layout.addWidget(self.g_multi_prediction_label, 3, 0)
+        self.general_layout.addWidget(self.g_multi_prediction_edit, 3, 1)
+        self.general_layout.addWidget(self.g_save_path_label, 4, 0)
+        self.general_layout.addWidget(self.g_save_path_label, 4, 1)
+        self.general_layout.addWidget(self.g_save_path_label, 5, 0)
+        self.general_layout.addWidget(self.g_current_path__label_label, 5, 1)
+
+        self.general_tab.setLayout(self.general_layout)
+        ### Finish
 
         self.main_grid.addWidget(self.tabs, 0, 0)
 
@@ -522,11 +556,20 @@ class MainWidgetWindow(QWidget):
         self.dm.add(data)
         elements=len(data)
         self.parsed_data={}
+
         #print(data)
+
+        for d in data:
+            self.parsed_data[d['id']] = d['value']
+        try:
+            altitude_p = 44330*(1 - np.power(float(self.parsed_data['pressure'])/float(self.conf['pressure']), 0.1903))
+            data.append({'id':'altitude_p', 'num':0,'text':'Altitude f. Pressure: ', 'value':str(round(altitude_p,2))})
+        except Exception as e:
+            pass
+
         for d in data:
             if d['id']  in self.info_grid_structure.keys():
                 self.info_grid_structure[ d['id']].setText(d['value'])
-                self.parsed_data[d['id']] = d['value']
             else:
                 self.info_grid_structure={}
         #print(self.info_grid_structure)

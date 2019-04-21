@@ -18,10 +18,10 @@ labels:
   num: 4
   text: "Wysoko\u015B\u0107:"
 - id: pressure
-  num: 5
+  num: 6
   text: "Ci\u015Bnienie:"
 - id: temperature
-  num: 6
+  num: 5
   text: 'Temperatura:'
 - id: pm25
   num: 7
@@ -29,11 +29,16 @@ labels:
 - id: pm10
   num: 8
   text: 'PM-10:'
+multi_prediction: !!python/object/apply:sip._unpickle_enum
+- PyQt5.QtCore
+- CheckState
+- 0
 port: COM11
 port_num: 3
 positionX: '1'
 positionY: '1'
 prediction: true
-save_path: 'D:\Projekty\Programowanide\CanSat\Logi'
+pressure: '1013'
+save_path: D:\Projekty\Programowanide\CanSat\Logi
 timeout: '1'
 version: '1.1'
