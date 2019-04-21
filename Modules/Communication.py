@@ -50,7 +50,7 @@ class DataCreator:
         st = copy.deepcopy(self.conf['labels'])
         data=str(data[:-2])[2:-1]
         #print(len(st)==data.count('_'))
-        if(len(st)==data.count('_')+2): #check if data is OK, THERE MUST BE 3
+        if(len(st)==data.count('_')+2): #check if data is OK, THERE MUST BE 2
             data = data.split("_")
             data.append(str(self._dataCounter))
             for s in st:

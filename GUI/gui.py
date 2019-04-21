@@ -15,15 +15,17 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from random import randint#nie potrzebne
 
 class ConfiguratorWindow(QWidget):
-    def __init__(self, conf):
+    def __init__(self, conf, obj):
         super().__init__()
-        self.initUI()
         self.conf = conf
+        self.obj = obj
+        self.initUI()
         self.structure={
         'baudrate':self.r_baudrate_edit,
         'port':self.r_port_edit,
         'timeout':self.r_timeout_edit
         }
+
 
     def initUI(self):
         self.main_grid = QGridLayout()
@@ -44,7 +46,8 @@ class ConfiguratorWindow(QWidget):
         self.r_timeout_label=QLabel('Timeout:')
 
         self.r_baudrate_edit=QLineEdit()
-        self.r_port_edit=QLineEdit()
+        self.r_port_edit=QComboBox()
+        self.r_load_ports()
         self.r_autoport_edit=QCheckBox()
         self.r_timeout_edit=QLineEdit()
 
@@ -121,6 +124,7 @@ class ConfiguratorWindow(QWidget):
 
     def load(self):
         data = self.conf.all()
+
         for k,v in self.structure.items():
             if k in data:
                 try:
@@ -133,6 +137,16 @@ class ConfiguratorWindow(QWidget):
                 except Exception as e:
                     print(e)
         self.load_structure()
+
+    def r_load_ports(self):
+        sl = self.obj['sl']
+        dev = sl.all_serials()
+        names = []
+        for d in dev:
+            names.append(d.device)
+        self.r_port_edit.addItems(names)
+        if self.conf['port'] in names:
+            self.r_port_edit.setCurrentText(self.conf['port'])
 
     def load_structure(self):
         labels =  self.conf.all()['labels']
@@ -473,7 +487,7 @@ class MainWidgetWindow(QWidget):
             self.prediction_button.setStyleSheet("background-color: red")
 
     def open_configuration(self):
-        self.conf_win=ConfiguratorWindow(self.conf)
+        self.conf_win=ConfiguratorWindow(self.conf, self.obj)
         self.conf_win.show()
 
     def change_plots(self):

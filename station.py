@@ -56,7 +56,8 @@ def new_reader(conf, obj, call):
 
 conf = Configurator('config.yaml')
 dm=DataManager(None)
-obj={'dm':dm, 'em':dm.em, 'rds':dm.ds, 'reader':new_reader, 'type':None}
+obj={'dm':dm, 'em':dm.em, 'rds':dm.ds, 'reader':new_reader,
+ 'type':None, 'sl':SerialLoader()}
 dc = DataCreator(conf, obj)
 obj['dc']=dc
 obj['predictor'] = Predictor()
