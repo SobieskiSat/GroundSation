@@ -1,5 +1,5 @@
 baudrate: '11520'
-elevation: '1'
+elevation: 1
 file: ''
 labels:
 - id: time
@@ -30,10 +30,10 @@ labels:
   num: 8
   text: 'PM-10:'
 port: COM11
-elevation: 1
 port_num: 3
 positionX: '1'
 positionY: '1'
 prediction: true
+save_path: 'D:\Projekty\Programowanide\CanSat\Logi'
 timeout: '1'
 version: '1.1'

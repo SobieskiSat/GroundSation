@@ -55,7 +55,7 @@ def new_reader(conf, obj, call):
         reader.start()
 
 conf = Configurator('config.yaml')
-dm=DataManager(None)
+dm=DataManager(conf)
 obj={'dm':dm, 'em':dm.em, 'rds':dm.ds, 'reader':new_reader,
  'type':None, 'sl':SerialLoader()}
 dc = DataCreator(conf, obj)

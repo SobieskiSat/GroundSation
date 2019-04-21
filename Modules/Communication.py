@@ -31,6 +31,7 @@ class DataCreator:
                 line=self.radio.readline()
                 #self._raw_data_sever(line)
                 if line!=None:
+                    self.obj['rds'].write(line)
                     line = self.parser(line)
                     self.call(line)
             except Exception as e:
