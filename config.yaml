@@ -1,11 +1,7 @@
-baudrate: '115200'
+baudrate: '11520'
 elevation: '1'
 file: ''
 labels:
-- id: elevation
-  num: 0
-  text: 'Start elevation:'
-  value: '1'
 - id: time
   num: 9
   text: 'Time:'
@@ -34,6 +30,7 @@ labels:
   num: 8
   text: 'PM-10:'
 port: COM11
+elevation: 1
 port_num: 3
 positionX: '1'
 positionY: '1'

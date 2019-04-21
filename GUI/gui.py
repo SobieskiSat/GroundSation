@@ -502,6 +502,8 @@ class MainWidgetWindow(QWidget):
         posY=None
         rssi=None
         data = self.obj['dc'].get()
+        data.append({'id':'Elevation', 'num':0,
+        'text':'Elevation: ', 'value':str(self.conf['elevation'])})#add elevation
         data=copy.deepcopy(data)#copy data
         self.dm.add(data)
         elements=len(data)
