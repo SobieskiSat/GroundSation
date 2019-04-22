@@ -2,21 +2,12 @@ baudrate: '115200'
 elevation: '1'
 file: ''
 labels:
-- id: send_num
-  num: 2
-  text: 'Packet Sent num:'
-- id: battery
-  num: 12
-  text: 'Battery:'
-- id: humidity
-  num: 11
-  text: 'Humidity:'
-- id: air_quality
-  num: 8
-  text: 'Air Quality:'
 - id: time
   num: 13
   text: 'Time:'
+- id: send_num
+  num: 2
+  text: 'Packet Sent num:'
 - id: rssi
   num: 1
   text: 'RSSI:'
@@ -41,12 +32,21 @@ labels:
 - id: pm10
   num: 10
   text: 'PM-10:'
+- id: humidity
+  num: 11
+  text: 'Humidity:'
+- id: air_quality
+  num: 8
+  text: 'Air Quality:'
+- id: battery
+  num: 12
+  text: 'Battery:'
 port: COM11
 port_num: 3
 positionX: '1'
 positionY: '1'
 prediction: true
 pressure: '1013.25'
-save_path: C:/saves
+save_path: C:/
 timeout: '1'
 version: '1.2'

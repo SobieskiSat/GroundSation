@@ -367,7 +367,7 @@ class MainWidgetWindow(QWidget):
         #### Do wyrzucenia
         labels=self.conf['labels']
         #labels[0].update({'value': conf.get("elevation") }) #dodawanie value do "elevation"
-        items=['time/rssi','time/positionX','time/positionY','time/temperature','time/pressure','time/altitude','time/pm25','time/pm10','time/altitude_p']
+        items=['time/rssi','time/positionX','time/positionY','time/temperature','time/pressure','time/altitude','time/pm25','time/pm10','time/altitude_p', 'time/air_quality', 'time/humidity', 'time/battery', 'time/send_num']
 
 
         '''
@@ -761,7 +761,7 @@ class PlotG:
 
 
     def _save(self):
-        path = self.obj['dm'].path
+        path = self.obj['dm'].newpath
         self.fig.savefig(path+'/'+str(self.obj['timer'].get_time())+'.png')
 
 
