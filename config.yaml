@@ -1,4 +1,4 @@
-baudrate: '11520'
+baudrate: '115200'
 elevation: '1'
 file: ''
 labels:
@@ -34,7 +34,7 @@ port_num: 3
 positionX: '1'
 positionY: '1'
 prediction: true
-pressure: '1013'
-save_path: D:/inne
+pressure: '1013.25'
+save_path: D:/saves
 timeout: '1'
 version: '1.1'

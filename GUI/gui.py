@@ -7,7 +7,7 @@ from PyQt5 import QtWebEngineWidgets, QtCore
 from PyQt5.QtWidgets import (QWidget, QPushButton, QLineEdit, QFrame,
 QDialog, QApplication, QComboBox, QLabel, QCheckBox, QGridLayout, QFileDialog,
 QHBoxLayout, QVBoxLayout, QSplitter, QRadioButton, QButtonGroup, QTabWidget,
- QTableWidget, QTableWidgetItem, QAbstractScrollArea, QHeaderView)
+ QTableWidget, QTableWidgetItem, QAbstractScrollArea, QHeaderView, QMessageBox)
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -25,8 +25,8 @@ class ConfiguratorWindow(QWidget):
         'port':self.r_port_edit,
         'timeout':self.r_timeout_edit,
         'elevation':self.g_elevation_edit,
-        'pressure':self.g_pressure_edit
-
+        'pressure':self.g_pressure_edit,
+        'save_path':self.g_current_path_label
         }
 
 
@@ -97,8 +97,8 @@ class ConfiguratorWindow(QWidget):
         self.g_pressure_label=QLabel('Pressure:')
         self.g_multi_prediction_label=QLabel('Multipoint Prediction:')
         self.g_save_path_label=QLabel('Set Save Path:')
-        self.g_current_path_label=QLabel('Current Path:')
-        self.g_current_path__label_label=QLabel('-')
+        self.g_current_path_label_label=QLabel('Current Path:')
+        self.g_current_path_label=QLabel('-')
 
         self.g_elevation_edit=QLineEdit()
         self.g_pressure_edit=QLineEdit()
@@ -114,8 +114,8 @@ class ConfiguratorWindow(QWidget):
         self.general_layout.addWidget(self.g_multi_prediction_edit, 3, 1)
         self.general_layout.addWidget(self.g_save_path_label, 4, 0)
         self.general_layout.addWidget(self.g_save_path_edit, 4, 1)
-        self.general_layout.addWidget(self.g_current_path_label, 5, 0)
-        self.general_layout.addWidget(self.g_current_path__label_label, 5, 1)
+        self.general_layout.addWidget(self.g_current_path_label_label, 5, 0)
+        self.general_layout.addWidget(self.g_current_path_label, 5, 1)
 
         self.general_tab.setLayout(self.general_layout)
         ### Finish
@@ -137,12 +137,16 @@ class ConfiguratorWindow(QWidget):
         self.p_stu.insertRow(self.p_stu.currentRow()+1)
 
     def p_remove(self):
-        self.p_stu.removeRow(self.p_stu.currentRow())
+        buttonReply = QMessageBox.question(self, 'Remove?', 'Do you want to remove '+str(self.p_stu.currentRow()+1)+' row?',
+         QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if buttonReply == QMessageBox.Yes:
+            self.p_stu.removeRow(self.p_stu.currentRow())
 
     def r_file_dialog(self):
         file_name = QFileDialog.getExistingDirectory(self, 'Select', '/home')
         if file_name:
             self.conf['save_path']=file_name
+        self.load()
 
 
     def save(self):
@@ -168,11 +172,12 @@ class ConfiguratorWindow(QWidget):
                 try:
                     if isinstance(v, QLineEdit):
                         v.setText(str(data[k]))
-                        print(k)
                     elif isinstance(v, QCheckBox):
                         v.setChecked(data[k])
                     elif isinstance(v, QComboBox):
                         v.setCurrentText(str(data[k]))#może nie działać
+                    elif isinstance(v, QLabel):
+                        v.setText(str(data[k]))
                 except Exception as e:
                     print(e)
         self.load_structure()
@@ -362,7 +367,7 @@ class MainWidgetWindow(QWidget):
         #### Do wyrzucenia
         labels=self.conf['labels']
         #labels[0].update({'value': conf.get("elevation") }) #dodawanie value do "elevation"
-        items=['time/rssi','time/positionX','time/positionY','time/temperature','time/pressure','time/altitude','time/pm25','time/pm10']
+        items=['time/rssi','time/positionX','time/positionY','time/temperature','time/pressure','time/altitude','time/pm25','time/pm10','time/altitude_p']
 
 
         '''
