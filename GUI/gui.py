@@ -93,8 +93,8 @@ class ConfiguratorWindow(QWidget):
 
         ### General tab
         self.general_layout = QGridLayout()
-        self.g_elevation_label=QLabel('Elevation:')
-        self.g_pressure_label=QLabel('Pressure:')
+        self.g_elevation_label=QLabel('Relative Altitude:')
+        self.g_pressure_label=QLabel('Relative Pressure:')
         self.g_multi_prediction_label=QLabel('Multipoint Prediction:')
         self.g_save_path_label=QLabel('Set Save Path:')
         self.g_current_path_label_label=QLabel('Current Path:')
@@ -561,7 +561,7 @@ class MainWidgetWindow(QWidget):
         rssi=None
         data = self.obj['dc'].get()
         data.append({'id':'Elevation', 'num':0,
-        'text':'Elevation: ', 'value':str(self.conf['elevation'])})#add elevation
+        'text':'Relative Altitude: ', 'value':str(self.conf['elevation'])})#add elevation
         data=copy.deepcopy(data)#copy data
         self.dm.add(data)
         elements=len(data)
