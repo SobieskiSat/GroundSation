@@ -1,0 +1,40 @@
+baudrate: '115200'
+elevation: '1'
+file: ''
+labels:
+- id: time
+  num: 9
+  text: 'Time:'
+- id: rssi
+  num: 1
+  text: 'RSSI:'
+- id: positionX
+  num: 2
+  text: 'Pozycja X:'
+- id: positionY
+  num: 3
+  text: 'Pozycja Y:'
+- id: altitude
+  num: 4
+  text: "Wysoko\u015B\u0107:"
+- id: pressure
+  num: 6
+  text: "Ci\u015Bnienie:"
+- id: temperature
+  num: 5
+  text: 'Temperatura:'
+- id: pm25
+  num: 7
+  text: 'PM-2,5:'
+- id: pm10
+  num: 8
+  text: 'PM-10:'
+port: COM11
+port_num: 3
+positionX: '1'
+positionY: '1'
+prediction: true
+pressure: '1013.25'
+save_path: D:/saves
+timeout: '1'
+version: '1.1'

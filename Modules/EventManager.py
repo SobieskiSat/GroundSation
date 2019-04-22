@@ -56,15 +56,16 @@ class DataSaver:
         pass
 
 class DataManager:
-    def __init__(self, path):
-        self.path=''
-        if path!=None:
-            self.path=path
-        self.prefix='/saves'
-        self.path+=self.prefix
+    def __init__(self, conf):
+        self.conf = conf
         self.new_save()
 
     def new_save(self):
+        self.path=''
+        if self.conf['save_path']!=None:
+            self.path=self.conf['save_path']
+        self.prefix='/saves'
+        self.path+=self.prefix
         num=0
         while(os.path.isdir(self.path+'/'+str(num))):
             num+=1
