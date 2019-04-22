@@ -516,6 +516,7 @@ class MainWidgetWindow(QWidget):
         self.obj['type']='Radio'
         #self.obj['dm'].new_save()
         self.obj['dc'].new_radio()
+        self.obj['timer'].reset()
         self.qtimer.start()
 
     def load_flight(self):

@@ -43,6 +43,16 @@ class Configurator:
     def __str__(self):
         return str(self.data)
 
+class MissionTimer:
+    def __init__(self):
+        self.start = time.time()
+
+    def get_time(self):
+        return round(time.time()-self.start, 2)
+
+    def reset(self):
+        self.start = time.time()
+
 def new_reader(conf, obj, call):
     if conf['type'] == 'radio':
         radio={
@@ -57,7 +67,7 @@ def new_reader(conf, obj, call):
 conf = Configurator('config.yaml')
 dm=DataManager(conf)
 obj={'dm':dm, 'em':dm.em, 'rds':dm.ds, 'reader':new_reader,
- 'type':None, 'sl':SerialLoader()}
+ 'type':None, 'sl':SerialLoader(), 'timer':MissionTimer()}
 dc = DataCreator(conf, obj)
 obj['dc']=dc
 obj['predictor'] = Predictor()
