@@ -549,9 +549,10 @@ class MainWidgetWindow(QWidget):
         self.right_plot.ly = right[1]
 
     def center_map(self):
-        posX=str(self.dm.get_by_id('positionX', 1)[0])
-        posY=str(self.dm.get_by_id('positionY', 1)[0])
         try:
+            posX=str(self.dm.get_by_id('positionX', 1)[0])
+            posY=str(self.dm.get_by_id('positionY', 1)[0])
+
             self.webView.page().runJavaScript('centerMap('+posX+', '+posY+')')
         except Exception as e:
             print(e)
@@ -660,7 +661,7 @@ class MainWidgetWindow(QWidget):
         self.webView.page().runJavaScript('resizeMap("'+str(w)+'px","'+str(h)+'px")')
 
     def draw_plot(self, typex, typey, dm):
-        return PlotG(typex, typey, dm)
+        return PlotG(typex, typey, dm, self.obj)
 
     def __del__(self):
         pass
@@ -671,7 +672,8 @@ class MainWidgetWindow(QWidget):
 
 
 class PlotG:
-    def __init__(self, lx, ly, dm):
+    def __init__(self, lx, ly, dm, obj):
+        self.obj = obj
         self.dm=dm
         self.fig = plt.Figure()#main figure
         self.canvas=FigureCanvas(self.fig)
@@ -699,7 +701,8 @@ class PlotG:
         self.sp.clear()
         tab=self.dm.get_by_id(self.ly, self.length)
         tab2=self.dm.get_by_id(self.lx, self.length)
-        self.sp.scatter(tab2, tab)
+        if self.length<200:
+            self.sp.scatter(tab2, tab)
         self.sp.plot(tab2, tab)
         #self.sp.plot(self.make_data(self.ly, data), self.make_data(self.lx, data))
         self.avsp.plot(tab2, [np.mean(tab) for i in tab])
@@ -719,18 +722,27 @@ class PlotG:
         self.widget_layout.addLayout(self.button_layout, 1, 1)
         self.zoomin_button=QPushButton('+', self.widget)
         self.zoomout_button=QPushButton('-',self.widget)
+        self.max_zoomin_button=QPushButton('(+)', self.widget)
+        self.max_zoomout_button=QPushButton('(-)',self.widget)
         self.save_button=QPushButton('S',self.widget)
         self.pause_button=QPushButton('||',self.widget)
         self.zoomin_button.setMaximumSize(30, 30)
         self.zoomout_button.setMaximumSize(30, 30)
+        self.max_zoomin_button.setMaximumSize(30, 30)
+        self.max_zoomout_button.setMaximumSize(30, 30)
         self.pause_button.setMaximumSize(30, 30)
         self.save_button.setMaximumSize(30, 30)
         self.zoomin_button.clicked.connect(self._zoomin)
         self.zoomout_button.clicked.connect(self._zoomout)
+        self.max_zoomin_button.clicked.connect(self._max_zoomin)
+        self.max_zoomout_button.clicked.connect(self._max_zoomout)
+        self.save_button.clicked.connect(self._save)
         self.button_layout.addWidget(self.zoomin_button, 1, 0)
         self.button_layout.addWidget(self.zoomout_button, 2, 0)
         self.button_layout.addWidget(self.pause_button, 3, 0)
         self.button_layout.addWidget(self.save_button, 4, 0)
+        self.button_layout.addWidget(self.max_zoomin_button, 5, 0)
+        self.button_layout.addWidget(self.max_zoomout_button, 6, 0)
 
         return self.widget
 
@@ -740,6 +752,17 @@ class PlotG:
 
     def _zoomout(self):
         self.length+=50
+
+    def _max_zoomin(self):
+        self.length=100
+
+    def _max_zoomout(self):
+        self.length=self.dm.max
+
+
+    def _save(self):
+        path = self.obj['dm'].path
+        self.fig.savefig(path+'/'+str(self.obj['timer'].get_time())+'.png')
 
 
 class TimeControlWidget(QWidget):

@@ -53,7 +53,7 @@ class DataCreator:
         #print(len(st)==data.count('_'))
         if(len(st)==data.count('_')+2): #check if data is OK, THERE MUST BE 2
             data = data.split("_")
-            data.append(str(self._dataCounter))
+            data.append(str(self.obj['timer'].get_time()))
             for s in st:
                 if s['num']!=0:
                     s['value']=data[s['num']-1]#set value of every structure (plus 1 => 0 is ignored by parser )
