@@ -93,8 +93,8 @@ class ConfiguratorWindow(QWidget):
 
         ### General tab
         self.general_layout = QGridLayout()
-        self.g_elevation_label=QLabel('Relative Altitude:')
-        self.g_pressure_label=QLabel('Relative Pressure:')
+        self.g_elevation_label=QLabel('Starting Altitude (from pressure):')
+        self.g_pressure_label=QLabel('Absolute Pressure:')
         self.g_multi_prediction_label=QLabel('Multipoint Prediction:')
         self.g_save_path_label=QLabel('Set Save Path:')
         self.g_current_path_label_label=QLabel('Current Path:')
@@ -367,7 +367,7 @@ class MainWidgetWindow(QWidget):
         #### Do wyrzucenia
         labels=self.conf['labels']
         #labels[0].update({'value': conf.get("elevation") }) #dodawanie value do "elevation"
-        items=['time/rssi','time/positionX','time/positionY','time/temperature','time/pressure','time/altitude','time/pm25','time/pm10','time/altitude_p', 'time/air_quality', 'time/humidity', 'time/battery', 'time/send_num']
+        items=['time/rssi','time/positionX','time/positionY','time/temperature','time/pressure','time/altitude','time/pm25','time/pm10','time/altitude_p', 'time/air_quality', 'time/humidity', 'time/battery', 'time/send_num', 'time/altitude_p_rel']
 
 
         '''
@@ -563,7 +563,7 @@ class MainWidgetWindow(QWidget):
         rssi=None
         data = self.obj['dc'].get()
         data.append({'id':'Elevation', 'num':0,
-        'text':'Relative Altitude: ', 'value':str(self.conf['elevation'])})#add elevation
+        'text':'Start Altitude: ', 'value':str(self.conf['elevation'])})#add elevation
         data=copy.deepcopy(data)#copy data
         self.dm.add(data)
         elements=len(data)
@@ -575,7 +575,10 @@ class MainWidgetWindow(QWidget):
             self.parsed_data[d['id']] = d['value']
         try:
             altitude_p = 44330*(1 - np.power(float(self.parsed_data['pressure'])/float(self.conf['pressure']), 0.1903))
-            data.append({'id':'altitude_p', 'num':0,'text':'Altitude f. Pressure: ', 'value':str(round(altitude_p,2))})
+            data.append({'id':'altitude_p', 'num':0,'text':'Altitude (pressure): ', 'value':str(round(altitude_p,2))})
+            altitude_p_rel = altitude_p-float(self.conf['elevation'])
+            data.append({'id':'altitude_p_rel', 'num':0,'text':'Rel Altitude (pressure): ', 'value':str(round(altitude_p_rel,2))})
+
         except Exception as e:
             pass
 
@@ -630,7 +633,7 @@ class MainWidgetWindow(QWidget):
                     pred=self.obj['predictor'].predict([
                         self.dm.get_by_id('positionX', predicts_num),
                         self.dm.get_by_id('positionY', predicts_num),
-                        self.dm.get_by_id('altitude', predicts_num)], float(self.conf.get("elevation"))) #nowe zmiana stałej 202 na stałą ustalaną podczas startu programu w gui.py
+                        self.dm.get_by_id('altitude_p', predicts_num)], float(self.conf.get("elevation"))) #nowe zmiana stałej 202 na stałą ustalaną podczas startu programu w gui.py
                     try:
                         self.webView.page().runJavaScript('drawPrediction('+str(pred['x'])+', '+str(pred['y'])+', '+str(pred['r'])+')')
                     except Exception as e:
