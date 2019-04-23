@@ -35,7 +35,7 @@
 			id: 'mapbox.streets'
 		}).addTo(mymap);
 	}
-	
+
 	function addPoint(x, y, rrsi, text){
 		var red=Math.round(Math.abs(rrsi*2));
 		var green=255-red;
@@ -76,6 +76,9 @@
     }).addTo(mymap);
   }
 
+	function clearPrediction(){
+      mymap.removeLayer(predictionCircle);
+	}
 
 </script>
 

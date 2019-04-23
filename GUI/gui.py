@@ -26,7 +26,8 @@ class ConfiguratorWindow(QWidget):
         'timeout':self.r_timeout_edit,
         'elevation':self.g_elevation_edit,
         'pressure':self.g_pressure_edit,
-        'save_path':self.g_current_path_label
+        'save_path':self.g_current_path_label,
+        'multi_prediction':self.g_multi_prediction_edit
         }
 
 
@@ -157,7 +158,7 @@ class ConfiguratorWindow(QWidget):
             elif isinstance(v, QComboBox):
                 new[k] = v.currentText()
             elif isinstance(v, QCheckBox):
-                new[k] = v.checkState()
+                new[k] = v.isChecked()
             ### Dodać Obsługę Pliki
         self.p_save_structure()
 
@@ -635,6 +636,8 @@ class MainWidgetWindow(QWidget):
                         self.dm.get_by_id('positionY', predicts_num),
                         self.dm.get_by_id('altitude_p', predicts_num)], float(self.conf.get("elevation"))) #nowe zmiana stałej 202 na stałą ustalaną podczas startu programu w gui.py
                     try:
+                        if self.conf['multi_prediction']==False:
+                            self.webView.page().runJavaScript('clearPrediction()')
                         self.webView.page().runJavaScript('drawPrediction('+str(pred['x'])+', '+str(pred['y'])+', '+str(pred['r'])+')')
                     except Exception as e:
                         print(e)
