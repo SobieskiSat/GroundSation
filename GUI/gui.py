@@ -610,6 +610,7 @@ class MainWidgetWindow(QWidget):
 
 
         except Exception as e:
+<<<<<<< HEAD
             print(e)
 
         try:
@@ -620,6 +621,12 @@ class MainWidgetWindow(QWidget):
             print(e)
 
 
+=======
+            pass
+        self.map_add_point(self.conf['start_positionX'],
+        self.conf['start_positionY'],
+        str(0), str("start point"))
+>>>>>>> 0519886201134c07da123f045fcdeaf1d8971267
         for d in data:
             if d['id']  in self.info_grid_structure.keys():
                 self.info_grid_structure[ d['id']].setText(d['value'])
