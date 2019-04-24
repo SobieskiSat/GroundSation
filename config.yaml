@@ -1,5 +1,5 @@
 baudrate: '115200'
-elevation: '1'
+elevation: '0'
 file: ''
 labels:
 - id: time
@@ -41,6 +41,7 @@ labels:
 - id: battery
   num: 12
   text: 'Battery:'
+multi_prediction: false
 port: COM11
 port_num: 3
 positionX: '1'
@@ -48,5 +49,7 @@ positionY: '1'
 prediction: true
 pressure: '1013.25'
 save_path: C:/
+start_positionX: '50.477696'
+start_positionY: '19.472804'
 timeout: '1'
 version: '1.2'
