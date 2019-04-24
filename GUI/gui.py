@@ -3,6 +3,7 @@ import yaml
 import copy
 import os
 import numpy as np
+from math import radians, cos, sin, asin, sqrt
 from PyQt5 import QtWebEngineWidgets, QtCore
 from PyQt5.QtWidgets import (QWidget, QPushButton, QLineEdit, QFrame,
 QDialog, QApplication, QComboBox, QLabel, QCheckBox, QGridLayout, QFileDialog,
@@ -27,7 +28,9 @@ class ConfiguratorWindow(QWidget):
         'elevation':self.g_elevation_edit,
         'pressure':self.g_pressure_edit,
         'save_path':self.g_current_path_label,
-        'multi_prediction':self.g_multi_prediction_edit
+        'multi_prediction':self.g_multi_prediction_edit,
+        'start_positionX':self.g_start_positionX_edit,
+        'start_positionY':self.g_start_positionY_edit
         }
 
 
@@ -100,23 +103,33 @@ class ConfiguratorWindow(QWidget):
         self.g_save_path_label=QLabel('Set Save Path:')
         self.g_current_path_label_label=QLabel('Current Path:')
         self.g_current_path_label=QLabel('-')
+        self.g_start_positionX_label=QLabel('Start Position X:')
+        self.g_start_positionY_label=QLabel('Start Position Y:')
+
 
         self.g_elevation_edit=QLineEdit()
         self.g_pressure_edit=QLineEdit()
         self.g_multi_prediction_edit=QCheckBox()
         self.g_save_path_edit=QPushButton('Wybierz')
+        self.g_start_positionX_edit=QLineEdit()
+        self.g_start_positionY_edit=QLineEdit()
+
         self.g_save_path_edit.clicked.connect(self.r_file_dialog)
 
         self.general_layout.addWidget(self.g_elevation_label, 1, 0)
         self.general_layout.addWidget(self.g_elevation_edit, 1, 1)
         self.general_layout.addWidget(self.g_pressure_label, 2, 0)
         self.general_layout.addWidget(self.g_pressure_edit, 2, 1)
-        self.general_layout.addWidget(self.g_multi_prediction_label, 3, 0)
-        self.general_layout.addWidget(self.g_multi_prediction_edit, 3, 1)
-        self.general_layout.addWidget(self.g_save_path_label, 4, 0)
-        self.general_layout.addWidget(self.g_save_path_edit, 4, 1)
-        self.general_layout.addWidget(self.g_current_path_label_label, 5, 0)
-        self.general_layout.addWidget(self.g_current_path_label, 5, 1)
+        self.general_layout.addWidget(self.g_start_positionX_label, 3, 0)
+        self.general_layout.addWidget(self.g_start_positionX_edit, 3, 1)
+        self.general_layout.addWidget(self.g_start_positionY_label, 4, 0)
+        self.general_layout.addWidget(self.g_start_positionY_edit, 4, 1)
+        self.general_layout.addWidget(self.g_multi_prediction_label, 5, 0)
+        self.general_layout.addWidget(self.g_multi_prediction_edit, 5, 1)
+        self.general_layout.addWidget(self.g_save_path_label, 6, 0)
+        self.general_layout.addWidget(self.g_save_path_edit, 6, 1)
+        self.general_layout.addWidget(self.g_current_path_label_label, 7, 0)
+        self.general_layout.addWidget(self.g_current_path_label, 7, 1)
 
         self.general_tab.setLayout(self.general_layout)
         ### Finish
@@ -558,6 +571,7 @@ class MainWidgetWindow(QWidget):
         except Exception as e:
             print(e)
 
+
     def update(self):
         posX=None
         posY=None
@@ -572,6 +586,18 @@ class MainWidgetWindow(QWidget):
 
         #print(data)
 
+        def haversine(lon1, lat1, lon2, lat2):
+            # convert decimal degrees to radians
+            lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
+            # haversine formula
+            dlon = lon2 - lon1
+            dlat = lat2 - lat1
+            a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+            c = 2 * asin(sqrt(a))
+            r = 6371 # Radius of earth in kilometers. Use 3956 for miles
+            return c * r * 1000 # km to m
+
+
         for d in data:
             self.parsed_data[d['id']] = d['value']
         try:
@@ -579,9 +605,20 @@ class MainWidgetWindow(QWidget):
             data.append({'id':'altitude_p', 'num':0,'text':'Altitude (pressure): ', 'value':str(round(altitude_p,2))})
             altitude_p_rel = altitude_p-float(self.conf['elevation'])
             data.append({'id':'altitude_p_rel', 'num':0,'text':'Rel Altitude (pressure): ', 'value':str(round(altitude_p_rel,2))})
+            distance = haversine(float(self.conf['start_positionX']), float(self.conf['start_positionY']), float(self.parsed_data['positionX']), float(self.parsed_data['positionY']))
+            data.append({'id':'distance_plane', 'num':0,'text':'Distance (plane-GPS): ', 'value':str(round(distance,2))})
+
 
         except Exception as e:
-            pass
+            print(e)
+
+        try:
+            self.map_add_point(self.conf['start_positionX'],
+            self.conf['start_positionY'],
+            str(0), str("start point"))
+        except Exception as e:
+            print(e)
+
 
         for d in data:
             if d['id']  in self.info_grid_structure.keys():
