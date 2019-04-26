@@ -534,7 +534,10 @@ class MainWidgetWindow(QWidget):
         self.qtimer.start()
 
     def load_flight(self):
-        pass
+        self.obj['type']='RawFile'
+        self.obj['raw_file']='C:/saves/2/raw.txt'
+        self.obj['dc'].run_raw_file_reader()
+        self.qtimer.start()
 
     def change_prediction_state(self):
         if 'prediction' not in self.obj:

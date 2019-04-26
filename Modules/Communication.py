@@ -42,10 +42,44 @@ class DataCreator:
         while(True):
             while(self.obj['type']=='Radio'):
                 self.run_radio()
+            while(self.obj['type']=='RawFile'):
+                self.next_raw_line()
+
 
     def _raw_data_sever(self, data):
         if('rds' in self.kwargs):
             self.kwargs['rds'](data)
+
+    def run_raw_file_reader(self):
+        file_name = self.obj['raw_file']
+        self.read_data = []
+        try:
+            with open(file_name, 'r') as f:
+
+                self.read_data = f.read()
+            self.read_data= self.read_data.split('\n')
+            print(self.read_data)
+        except Exception as e:
+            print(e)
+            return 0
+        self.old_time = 0
+
+    def next_raw_line(self):
+        #print(self.read_data)
+        if len(self.read_data)<2:
+            return 0
+        for l in self.read_data:
+            nl = l.split('_', 1)
+            line = self.parser(nl[1])
+            if self.old_time !=0:
+                time.sleep(nl[0]-self.old_time)
+            self.old_time = new_time
+            self.call(nl[0])
+
+
+
+
+
 
     def parser(self, data):
         st = copy.deepcopy(self.conf['labels'])
@@ -63,6 +97,7 @@ class DataCreator:
 
 
     def call(self, data):
+        print(data)
         self.data = data
 
     def get(self):
