@@ -584,17 +584,23 @@ class MainWidgetWindow(QWidget):
         elements=len(data)
         self.parsed_data={}
 
-        #print(data)
 
         def haversine(lon1, lat1, lon2, lat2):
             # convert decimal degrees to radians
+            #print(lon1)
+            #print(lon2)
+            #print(lat1)
+            #print(lat2)
             lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
             # haversine formula
+
+
             dlon = lon2 - lon1
             dlat = lat2 - lat1
             a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
             c = 2 * asin(sqrt(a))
-            r = 6371 # Radius of earth in kilometers. Use 3956 for miles
+            r = 6300 # Radius of earth in kilometers. Use 3956 for miles
+            #print(c*r*1000)
             return c * r * 1000 # km to m
 
 
@@ -607,6 +613,19 @@ class MainWidgetWindow(QWidget):
             data.append({'id':'altitude_p_rel', 'num':0,'text':'Rel Altitude (pressure): ', 'value':str(round(altitude_p_rel,2))})
             distance = haversine(float(self.conf['start_positionX']), float(self.conf['start_positionY']), float(self.parsed_data['positionX']), float(self.parsed_data['positionY']))
             data.append({'id':'distance_plane', 'num':0,'text':'Distance (plane-GPS): ', 'value':str(round(distance,2))})
+            vertical_velocity=9999
+            try:
+                num=20
+                if(len(self.dm.get_by_id('altitude_p', num))==num and len(self.dm.get_by_id('time', num))==num):
+                    alts=self.dm.get_by_id('altitude_p', num)
+                    d_alts=alts[num-1]-alts[0]
+                    times=self.dm.get_by_id('time', num)
+                    d_times=times[num-1]-times[0]
+                    vertical_velocity=d_alts/d_times # z 'num' pakietów # + w górę, - w dół
+            except Exception as e:
+                print(e)
+            data.append({'id':'vertical_velocity', 'num':0,'text':'Vertical velocity: ', 'value':str(round(vertical_velocity,2))})
+
 
 
         except Exception as e:
@@ -619,11 +638,6 @@ class MainWidgetWindow(QWidget):
         except Exception as e:
             print(e)
 
-
-            pass
-        self.map_add_point(self.conf['start_positionX'],
-        self.conf['start_positionY'],
-        str(0), str("start point"))
         for d in data:
             if d['id']  in self.info_grid_structure.keys():
                 self.info_grid_structure[ d['id']].setText(d['value'])
