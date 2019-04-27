@@ -616,12 +616,12 @@ class MainWidgetWindow(QWidget):
             data.append({'id':'altitude_p_rel', 'num':0,'text':'Rel Altitude (pressure): ', 'value':str(round(altitude_p_rel,2))})
             distance = haversine(float(self.conf['start_positionX']), float(self.conf['start_positionY']), float(self.parsed_data['positionX']), float(self.parsed_data['positionY']))
             data.append({'id':'distance_plane', 'num':0,'text':'Distance (plane-GPS): ', 'value':str(round(distance,2))})
-            vertical_velocity=9999
+            vertical_velocity=0
             try:
                 num=20
                 if(len(self.dm.get_by_id('altitude_p', num))==num and len(self.dm.get_by_id('time', num))==num):
                     alts=self.dm.get_by_id('altitude_p', num)
-                    d_alts=np.absolute(alts[num-1]-alts[0])
+                    d_alts=alts[num-1]-alts[0]
                     times=self.dm.get_by_id('time', num)
                     d_times=times[num-1]-times[0]
                     vertical_velocity=d_alts/d_times # z 'num' pakietów # + w górę, - w dół
