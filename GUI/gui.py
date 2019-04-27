@@ -381,7 +381,7 @@ class MainWidgetWindow(QWidget):
         #### Do wyrzucenia
         labels=self.conf['labels']
         #labels[0].update({'value': conf.get("elevation") }) #dodawanie value do "elevation"
-        items=['time/rssi','time/positionX','time/positionY','time/temperature','time/pressure','time/altitude','time/pm25','time/pm10','time/altitude_p', 'time/air_quality', 'time/humidity', 'time/battery', 'time/send_num', 'time/altitude_p_rel']
+        items=['time/rssi','time/positionX','time/positionY','time/temperature','time/pressure','time/altitude','time/pm25','time/pm10','time/altitude_p', 'time/air_quality', 'time/humidity', 'time/battery', 'time/send_num', 'time/altitude_p_rel', 'time/vertical_velocity' ,'altitude_p_rel/pressure', 'altitude_p_rel/temperature']
 
 
         '''
@@ -621,7 +621,7 @@ class MainWidgetWindow(QWidget):
                 num=20
                 if(len(self.dm.get_by_id('altitude_p', num))==num and len(self.dm.get_by_id('time', num))==num):
                     alts=self.dm.get_by_id('altitude_p', num)
-                    d_alts=alts[num-1]-alts[0]
+                    d_alts=np.absolute(alts[num-1]-alts[0])
                     times=self.dm.get_by_id('time', num)
                     d_times=times[num-1]-times[0]
                     vertical_velocity=d_alts/d_times # z 'num' pakietów # + w górę, - w dół

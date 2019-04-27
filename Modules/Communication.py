@@ -58,7 +58,7 @@ class DataCreator:
 
                 self.read_data = f.read()
             self.read_data= self.read_data.split('\n')
-            print(self.read_data)
+            #print(self.read_data)
         except Exception as e:
             print(e)
             return 0
@@ -97,7 +97,7 @@ class DataCreator:
 
 
     def call(self, data):
-        print(data)
+        #print(data)
         self.data = data
 
     def get(self):
