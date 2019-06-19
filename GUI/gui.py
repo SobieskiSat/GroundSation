@@ -375,13 +375,13 @@ class MainWidgetWindow(QWidget):
         self.obj = obj
         self.dm=DataManager(5000)
         self.initUI()
-
+    #    self.vert_velo_list=[]
     def initUI(self):
         self.labels={}
         #### Do wyrzucenia
         labels=self.conf['labels']
         #labels[0].update({'value': conf.get("elevation") }) #dodawanie value do "elevation"
-        items=['time/rssi','time/positionX','time/positionY','time/temperature','time/pressure','time/altitude','time/pm25','time/pm10','time/altitude_p', 'time/air_quality', 'time/humidity', 'time/battery', 'time/send_num', 'time/altitude_p_rel', 'time/vertical_velocity' ,'altitude_p_rel/pressure', 'altitude_p_rel/temperature']
+        items=['time/rssi','time/positionX','time/positionY','time/temperature','time/pressure','time/altitude','time/pm25','time/pm10','time/altitude_p', 'time/air_quality', 'time/humidity', 'time/battery', 'time/send_num', 'time/altitude_p_rel', 'time/vertical_velocity' ,'altitude_p_rel/pressure', 'altitude_p_rel/temperature','altitude_p_rel/pm10', 'altitude_p_rel/air_quality', 'altitude_p_rel/humidity']
 
 
         '''
@@ -609,6 +609,12 @@ class MainWidgetWindow(QWidget):
 
         for d in data:
             self.parsed_data[d['id']] = d['value']
+
+        try:
+            data[11]['value']=str(round(float(data[11]['value'])/1024*100,2))
+        except Exception as e:
+            print(e)
+
         try:
             altitude_p = 44330*(1 - np.power(float(self.parsed_data['pressure'])/float(self.conf['pressure']), 0.1903))
             data.append({'id':'altitude_p', 'num':0,'text':'Altitude (pressure): ', 'value':str(round(altitude_p,2))})
@@ -625,6 +631,9 @@ class MainWidgetWindow(QWidget):
                     times=self.dm.get_by_id('time', num)
                     d_times=times[num-1]-times[0]
                     vertical_velocity=d_alts/d_times # z 'num' pakietów # + w górę, - w dół
+
+            #        self.vert_velo_list.append(vertical_velocity)
+            #        print(np.mean(self.vert_velo_list))
             except Exception as e:
                 print(e)
             data.append({'id':'vertical_velocity', 'num':0,'text':'Vertical velocity: ', 'value':str(round(vertical_velocity,2))})
