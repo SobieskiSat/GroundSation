@@ -70,6 +70,7 @@ class DataManager:
         while(os.path.isdir(self.path+'/'+str(num))):
             num+=1
         path=self.path+'/'+str(num)
+        self.newpath=path
         try:
             os.makedirs(path)
             #self.ds.save()

@@ -27,16 +27,24 @@
 	var mymap=L.map('mapid');
 	function init(x, y, z){
 		mymap.setView([x, y], z);
-		L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoidWhqYWxka293b2FkIiwiYSI6ImNqcHp5NHJicTBmbG80MXBsMjZsYmI5czIifQ.tzEtn-OxzSjl0V0URqdU1A', {
-			maxZoom: 20,
-			attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
-				'<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-				'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-			id: 'mapbox.streets'
-		}).addTo(mymap);
+		
+		L.tileLayer('4uMaps/{z}/{x}/{y}.png',
+				{    maxZoom: 16  }).addTo(mymap);
 	}
-	
+
 	function addPoint(x, y, rrsi, text){
+		if(rrsi==0){
+			L.circle([x, y], 3, {
+				color: 'rgb(0,0,0)',
+		//		color: 'rgb(100,100,0)',
+
+
+				//fillColor:  'rgb('+red+','+green+',0)',
+				fillOpacity: 1
+			}).addTo(mymap).bindPopup(text);
+		}
+		else {
+
 		var red=Math.round(Math.abs(rrsi*2));
 		var green=255-red;
 		if(red>255)red=255;
@@ -49,6 +57,7 @@
 			//fillColor:  'rgb('+red+','+green+',0)',
 			fillOpacity: 1
 		}).addTo(mymap).bindPopup(text);
+	}
 	}
 	//addPoint(50.05925, 19.92293, 13)
 	function addMarker(x, y, text){
@@ -76,6 +85,9 @@
     }).addTo(mymap);
   }
 
+	function clearPrediction(){
+      mymap.removeLayer(predictionCircle);
+	}
 
 </script>
 

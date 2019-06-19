@@ -3,6 +3,7 @@ import yaml
 import copy
 import os
 import numpy as np
+from math import radians, cos, sin, asin, sqrt
 from PyQt5 import QtWebEngineWidgets, QtCore
 from PyQt5.QtWidgets import (QWidget, QPushButton, QLineEdit, QFrame,
 QDialog, QApplication, QComboBox, QLabel, QCheckBox, QGridLayout, QFileDialog,
@@ -26,7 +27,10 @@ class ConfiguratorWindow(QWidget):
         'timeout':self.r_timeout_edit,
         'elevation':self.g_elevation_edit,
         'pressure':self.g_pressure_edit,
-        'save_path':self.g_current_path_label
+        'save_path':self.g_current_path_label,
+        'multi_prediction':self.g_multi_prediction_edit,
+        'start_positionX':self.g_start_positionX_edit,
+        'start_positionY':self.g_start_positionY_edit
         }
 
 
@@ -93,29 +97,39 @@ class ConfiguratorWindow(QWidget):
 
         ### General tab
         self.general_layout = QGridLayout()
-        self.g_elevation_label=QLabel('Elevation:')
-        self.g_pressure_label=QLabel('Pressure:')
+        self.g_elevation_label=QLabel('Starting Altitude (from pressure):')
+        self.g_pressure_label=QLabel('Absolute Pressure:')
         self.g_multi_prediction_label=QLabel('Multipoint Prediction:')
         self.g_save_path_label=QLabel('Set Save Path:')
         self.g_current_path_label_label=QLabel('Current Path:')
         self.g_current_path_label=QLabel('-')
+        self.g_start_positionX_label=QLabel('Start Position X:')
+        self.g_start_positionY_label=QLabel('Start Position Y:')
+
 
         self.g_elevation_edit=QLineEdit()
         self.g_pressure_edit=QLineEdit()
         self.g_multi_prediction_edit=QCheckBox()
         self.g_save_path_edit=QPushButton('Wybierz')
+        self.g_start_positionX_edit=QLineEdit()
+        self.g_start_positionY_edit=QLineEdit()
+
         self.g_save_path_edit.clicked.connect(self.r_file_dialog)
 
         self.general_layout.addWidget(self.g_elevation_label, 1, 0)
         self.general_layout.addWidget(self.g_elevation_edit, 1, 1)
         self.general_layout.addWidget(self.g_pressure_label, 2, 0)
         self.general_layout.addWidget(self.g_pressure_edit, 2, 1)
-        self.general_layout.addWidget(self.g_multi_prediction_label, 3, 0)
-        self.general_layout.addWidget(self.g_multi_prediction_edit, 3, 1)
-        self.general_layout.addWidget(self.g_save_path_label, 4, 0)
-        self.general_layout.addWidget(self.g_save_path_edit, 4, 1)
-        self.general_layout.addWidget(self.g_current_path_label_label, 5, 0)
-        self.general_layout.addWidget(self.g_current_path_label, 5, 1)
+        self.general_layout.addWidget(self.g_start_positionX_label, 3, 0)
+        self.general_layout.addWidget(self.g_start_positionX_edit, 3, 1)
+        self.general_layout.addWidget(self.g_start_positionY_label, 4, 0)
+        self.general_layout.addWidget(self.g_start_positionY_edit, 4, 1)
+        self.general_layout.addWidget(self.g_multi_prediction_label, 5, 0)
+        self.general_layout.addWidget(self.g_multi_prediction_edit, 5, 1)
+        self.general_layout.addWidget(self.g_save_path_label, 6, 0)
+        self.general_layout.addWidget(self.g_save_path_edit, 6, 1)
+        self.general_layout.addWidget(self.g_current_path_label_label, 7, 0)
+        self.general_layout.addWidget(self.g_current_path_label, 7, 1)
 
         self.general_tab.setLayout(self.general_layout)
         ### Finish
@@ -157,7 +171,7 @@ class ConfiguratorWindow(QWidget):
             elif isinstance(v, QComboBox):
                 new[k] = v.currentText()
             elif isinstance(v, QCheckBox):
-                new[k] = v.checkState()
+                new[k] = v.isChecked()
             ### Dodać Obsługę Pliki
         self.p_save_structure()
 
@@ -361,13 +375,13 @@ class MainWidgetWindow(QWidget):
         self.obj = obj
         self.dm=DataManager(5000)
         self.initUI()
-
+    #    self.vert_velo_list=[]
     def initUI(self):
         self.labels={}
         #### Do wyrzucenia
         labels=self.conf['labels']
         #labels[0].update({'value': conf.get("elevation") }) #dodawanie value do "elevation"
-        items=['time/rssi','time/positionX','time/positionY','time/temperature','time/pressure','time/altitude','time/pm25','time/pm10','time/altitude_p']
+        items=['time/rssi','time/positionX','time/positionY','time/temperature','time/pressure','time/altitude','time/pm25','time/pm10','time/altitude_p', 'time/air_quality', 'time/humidity', 'time/battery', 'time/send_num', 'time/altitude_p_rel', 'time/vertical_velocity' ,'altitude_p_rel/pressure', 'altitude_p_rel/temperature','altitude_p_rel/pm10', 'altitude_p_rel/air_quality', 'altitude_p_rel/humidity']
 
 
         '''
@@ -516,10 +530,14 @@ class MainWidgetWindow(QWidget):
         self.obj['type']='Radio'
         #self.obj['dm'].new_save()
         self.obj['dc'].new_radio()
+        self.obj['timer'].reset()
         self.qtimer.start()
 
     def load_flight(self):
-        pass
+        self.obj['type']='RawFile'
+        self.obj['raw_file']='C:/saves/2/raw.txt'
+        self.obj['dc'].run_raw_file_reader()
+        self.qtimer.start()
 
     def change_prediction_state(self):
         if 'prediction' not in self.obj:
@@ -548,12 +566,14 @@ class MainWidgetWindow(QWidget):
         self.right_plot.ly = right[1]
 
     def center_map(self):
-        posX=str(self.dm.get_by_id('positionX', 1)[0])
-        posY=str(self.dm.get_by_id('positionY', 1)[0])
         try:
+            posX=str(self.dm.get_by_id('positionX', 1)[0])
+            posY=str(self.dm.get_by_id('positionY', 1)[0])
+
             self.webView.page().runJavaScript('centerMap('+posX+', '+posY+')')
         except Exception as e:
             print(e)
+
 
     def update(self):
         posX=None
@@ -561,21 +581,74 @@ class MainWidgetWindow(QWidget):
         rssi=None
         data = self.obj['dc'].get()
         data.append({'id':'Elevation', 'num':0,
-        'text':'Elevation: ', 'value':str(self.conf['elevation'])})#add elevation
+        'text':'Start Altitude: ', 'value':str(self.conf['elevation'])})#add elevation
         data=copy.deepcopy(data)#copy data
         self.dm.add(data)
         elements=len(data)
         self.parsed_data={}
 
-        #print(data)
+
+        def haversine(lon1, lat1, lon2, lat2):
+            # convert decimal degrees to radians
+            #print(lon1)
+            #print(lon2)
+            #print(lat1)
+            #print(lat2)
+            lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
+            # haversine formula
+
+
+            dlon = lon2 - lon1
+            dlat = lat2 - lat1
+            a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+            c = 2 * asin(sqrt(a))
+            r = 6300 # Radius of earth in kilometers. Use 3956 for miles
+            #print(c*r*1000)
+            return c * r * 1000 # km to m
+
 
         for d in data:
             self.parsed_data[d['id']] = d['value']
+
+        try:
+            data[11]['value']=str(round(float(data[11]['value'])/1024*100,2))
+        except Exception as e:
+            print(e)
+
         try:
             altitude_p = 44330*(1 - np.power(float(self.parsed_data['pressure'])/float(self.conf['pressure']), 0.1903))
-            data.append({'id':'altitude_p', 'num':0,'text':'Altitude f. Pressure: ', 'value':str(round(altitude_p,2))})
+            data.append({'id':'altitude_p', 'num':0,'text':'Altitude (pressure): ', 'value':str(round(altitude_p,2))})
+            altitude_p_rel = altitude_p-float(self.conf['elevation'])
+            data.append({'id':'altitude_p_rel', 'num':0,'text':'Rel Altitude (pressure): ', 'value':str(round(altitude_p_rel,2))})
+            distance = haversine(float(self.conf['start_positionX']), float(self.conf['start_positionY']), float(self.parsed_data['positionX']), float(self.parsed_data['positionY']))
+            data.append({'id':'distance_plane', 'num':0,'text':'Distance (plane-GPS): ', 'value':str(round(distance,2))})
+            vertical_velocity=0
+            try:
+                num=20
+                if(len(self.dm.get_by_id('altitude_p', num))==num and len(self.dm.get_by_id('time', num))==num):
+                    alts=self.dm.get_by_id('altitude_p', num)
+                    d_alts=alts[num-1]-alts[0]
+                    times=self.dm.get_by_id('time', num)
+                    d_times=times[num-1]-times[0]
+                    vertical_velocity=d_alts/d_times # z 'num' pakietów # + w górę, - w dół
+
+            #        self.vert_velo_list.append(vertical_velocity)
+            #        print(np.mean(self.vert_velo_list))
+            except Exception as e:
+                print(e)
+            data.append({'id':'vertical_velocity', 'num':0,'text':'Vertical velocity: ', 'value':str(round(vertical_velocity,2))})
+
+
+
         except Exception as e:
-            pass
+            print(e)
+
+        try:
+            self.map_add_point(self.conf['start_positionX'],
+            self.conf['start_positionY'],
+            str(0), str("start point"))
+        except Exception as e:
+            print(e)
 
         for d in data:
             if d['id']  in self.info_grid_structure.keys():
@@ -628,8 +701,10 @@ class MainWidgetWindow(QWidget):
                     pred=self.obj['predictor'].predict([
                         self.dm.get_by_id('positionX', predicts_num),
                         self.dm.get_by_id('positionY', predicts_num),
-                        self.dm.get_by_id('altitude', predicts_num)], float(self.conf.get("elevation"))) #nowe zmiana stałej 202 na stałą ustalaną podczas startu programu w gui.py
+                        self.dm.get_by_id('altitude_p', predicts_num)], float(self.conf.get("elevation"))) #nowe zmiana stałej 202 na stałą ustalaną podczas startu programu w gui.py
                     try:
+                        if self.conf['multi_prediction']==False:
+                            self.webView.page().runJavaScript('clearPrediction()')
                         self.webView.page().runJavaScript('drawPrediction('+str(pred['x'])+', '+str(pred['y'])+', '+str(pred['r'])+')')
                     except Exception as e:
                         print(e)
@@ -659,7 +734,7 @@ class MainWidgetWindow(QWidget):
         self.webView.page().runJavaScript('resizeMap("'+str(w)+'px","'+str(h)+'px")')
 
     def draw_plot(self, typex, typey, dm):
-        return PlotG(typex, typey, dm)
+        return PlotG(typex, typey, dm, self.obj)
 
     def __del__(self):
         pass
@@ -670,7 +745,8 @@ class MainWidgetWindow(QWidget):
 
 
 class PlotG:
-    def __init__(self, lx, ly, dm):
+    def __init__(self, lx, ly, dm, obj):
+        self.obj = obj
         self.dm=dm
         self.fig = plt.Figure()#main figure
         self.canvas=FigureCanvas(self.fig)
@@ -698,7 +774,8 @@ class PlotG:
         self.sp.clear()
         tab=self.dm.get_by_id(self.ly, self.length)
         tab2=self.dm.get_by_id(self.lx, self.length)
-        self.sp.scatter(tab2, tab)
+        if self.length<200:
+            self.sp.scatter(tab2, tab)
         self.sp.plot(tab2, tab)
         #self.sp.plot(self.make_data(self.ly, data), self.make_data(self.lx, data))
         self.avsp.plot(tab2, [np.mean(tab) for i in tab])
@@ -718,18 +795,27 @@ class PlotG:
         self.widget_layout.addLayout(self.button_layout, 1, 1)
         self.zoomin_button=QPushButton('+', self.widget)
         self.zoomout_button=QPushButton('-',self.widget)
+        self.max_zoomin_button=QPushButton('(+)', self.widget)
+        self.max_zoomout_button=QPushButton('(-)',self.widget)
         self.save_button=QPushButton('S',self.widget)
         self.pause_button=QPushButton('||',self.widget)
         self.zoomin_button.setMaximumSize(30, 30)
         self.zoomout_button.setMaximumSize(30, 30)
+        self.max_zoomin_button.setMaximumSize(30, 30)
+        self.max_zoomout_button.setMaximumSize(30, 30)
         self.pause_button.setMaximumSize(30, 30)
         self.save_button.setMaximumSize(30, 30)
         self.zoomin_button.clicked.connect(self._zoomin)
         self.zoomout_button.clicked.connect(self._zoomout)
+        self.max_zoomin_button.clicked.connect(self._max_zoomin)
+        self.max_zoomout_button.clicked.connect(self._max_zoomout)
+        self.save_button.clicked.connect(self._save)
         self.button_layout.addWidget(self.zoomin_button, 1, 0)
         self.button_layout.addWidget(self.zoomout_button, 2, 0)
         self.button_layout.addWidget(self.pause_button, 3, 0)
         self.button_layout.addWidget(self.save_button, 4, 0)
+        self.button_layout.addWidget(self.max_zoomin_button, 5, 0)
+        self.button_layout.addWidget(self.max_zoomout_button, 6, 0)
 
         return self.widget
 
@@ -739,6 +825,17 @@ class PlotG:
 
     def _zoomout(self):
         self.length+=50
+
+    def _max_zoomin(self):
+        self.length=100
+
+    def _max_zoomout(self):
+        self.length=self.dm.max
+
+
+    def _save(self):
+        path = self.obj['dm'].newpath
+        self.fig.savefig(path+'/'+str(self.obj['timer'].get_time())+'.png')
 
 
 class TimeControlWidget(QWidget):
